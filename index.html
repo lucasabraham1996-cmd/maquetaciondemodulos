@@ -49,86 +49,133 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
-            <!-- FORMULARIO DE INGRESO -->
+            <!-- COLUMNA IZQUIERDA: VALORES Y FORMULARIO -->
             <div class="lg:col-span-1">
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 sticky top-6">
-                    <h2 class="text-lg font-semibold mb-4 border-b pb-2 flex items-center gap-2">
-                        <i class="fas fa-plus"></i> Nuevo Módulo
-                    </h2>
+                <div class="sticky top-6 space-y-6">
                     
-                    <form id="form-modulo" class="space-y-4">
-                        <div>
-                            <label class="block text-xs font-medium text-gray-700 mb-1">Carrera</label>
-                            <select id="carreraId" class="w-full text-sm rounded-md border-gray-300 border p-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-50">
-                                <!-- Llenado por JS -->
-                            </select>
+                    <!-- REFERENCIA DE VALORES E INCREMENTO -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+                        <h2 class="text-lg font-semibold mb-4 border-b pb-2 flex items-center gap-2">
+                            <i class="fas fa-tags text-blue-600"></i> Referencia de Valores
+                        </h2>
+                        
+                        <div class="mb-4 bg-gray-50 p-3 rounded-lg border border-gray-200">
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Aumento / Incremento (%)</label>
+                            <div class="flex items-center gap-2">
+                                <input type="number" id="input-incremento" value="0" min="0" class="w-full text-sm rounded-md border-gray-300 border p-2 focus:ring-blue-500 focus:border-blue-500" oninput="actualizarTablaValores()">
+                                <span class="text-gray-500 font-bold">%</span>
+                            </div>
+                            <p class="text-[10px] text-gray-500 mt-1">Al crear o editar un módulo, su costo se calculará con este porcentaje.</p>
                         </div>
 
-                        <!-- Modalidad (Múltiple) -->
-                        <div>
-                            <label class="block text-xs font-medium text-gray-700 mb-1">Modalidad</label>
-                            <div class="flex flex-wrap gap-3 mt-1">
-                                <label class="flex items-center gap-1.5 text-sm cursor-pointer">
-                                    <input type="checkbox" name="modalidad" value="Presencial" class="rounded text-blue-600 focus:ring-blue-500">
-                                    Presencial
-                                </label>
-                                <label class="flex items-center gap-1.5 text-sm cursor-pointer">
-                                    <input type="checkbox" name="modalidad" value="Semipresencial" class="rounded text-blue-600 focus:ring-blue-500">
-                                    Semipresencial
-                                </label>
-                                <label class="flex items-center gap-1.5 text-sm cursor-pointer">
-                                    <input type="checkbox" name="modalidad" value="Distancia" class="rounded text-blue-600 focus:ring-blue-500">
-                                    Distancia
-                                </label>
-                            </div>
-                        </div>
+                        <table class="w-full text-sm text-left text-gray-600">
+                            <tbody>
+                                <tr class="border-b border-gray-100">
+                                    <td class="py-2">Hasta 80 pág.</td>
+                                    <td class="py-2 text-right font-bold text-gray-800" id="val-80">$ 42.000</td>
+                                </tr>
+                                <tr class="border-b border-gray-100">
+                                    <td class="py-2">81 a 120 pág.</td>
+                                    <td class="py-2 text-right font-bold text-gray-800" id="val-120">$ 52.500</td>
+                                </tr>
+                                <tr class="border-b border-gray-100">
+                                    <td class="py-2">121 a 140 pág.</td>
+                                    <td class="py-2 text-right font-bold text-gray-800" id="val-140">$ 63.000</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2">Más de 141 pág.</td>
+                                    <td class="py-2 text-right font-bold text-gray-800" id="val-141">$ 73.500</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
 
-                        <div>
-                            <label class="block text-xs font-medium text-gray-700 mb-1">Nombre del Módulo</label>
-                            <input required type="text" id="nombre" placeholder="Ej: Marketing Digital I" class="w-full text-sm rounded-md border-gray-300 border p-2 focus:ring-blue-500 focus:border-blue-500">
-                        </div>
+                    <!-- FORMULARIO DE INGRESO / EDICIÓN -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+                        <h2 id="titulo-formulario" class="text-lg font-semibold mb-4 border-b pb-2 flex items-center gap-2">
+                            <i class="fas fa-plus text-green-600"></i> Nuevo Módulo
+                        </h2>
+                        
+                        <form id="form-modulo" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Carrera</label>
+                                <select id="carreraId" class="w-full text-sm rounded-md border-gray-300 border p-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-50">
+                                    <!-- Llenado por JS -->
+                                </select>
+                            </div>
 
-                        <div class="grid grid-cols-2 gap-3">
+                            <!-- Modalidad (Múltiple) -->
                             <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-1">Profesor/a</label>
-                                <input required type="text" id="profesor" placeholder="Nombre del docente" class="w-full text-sm rounded-md border-gray-300 border p-2 focus:ring-blue-500 focus:border-blue-500">
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Modalidad</label>
+                                <div class="flex flex-wrap gap-3 mt-1">
+                                    <label class="flex items-center gap-1.5 text-sm cursor-pointer">
+                                        <input type="checkbox" name="modalidad" value="Presencial" class="rounded text-blue-600 focus:ring-blue-500">
+                                        Presencial
+                                    </label>
+                                    <label class="flex items-center gap-1.5 text-sm cursor-pointer">
+                                        <input type="checkbox" name="modalidad" value="Semipresencial" class="rounded text-blue-600 focus:ring-blue-500">
+                                        Semipresencial
+                                    </label>
+                                    <label class="flex items-center gap-1.5 text-sm cursor-pointer">
+                                        <input type="checkbox" name="modalidad" value="Distancia" class="rounded text-blue-600 focus:ring-blue-500">
+                                        Distancia
+                                    </label>
+                                </div>
                             </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-1">Fecha de Entrega</label>
-                                <input type="date" id="fechaEntrega" class="w-full text-sm rounded-md border-gray-300 border p-2 focus:ring-blue-500 focus:border-blue-500 text-gray-600">
-                            </div>
-                        </div>
 
-                        <div class="grid grid-cols-2 gap-3">
                             <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-1">Pág. Módulo</label>
-                                <input required type="number" min="0" id="paginasModulo" class="w-full text-sm rounded-md border-gray-300 border p-2 focus:ring-blue-500 focus:border-blue-500">
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Nombre del Módulo</label>
+                                <input type="text" id="nombre" placeholder="Ej: Marketing Digital I" class="w-full text-sm rounded-md border-gray-300 border p-2 focus:ring-blue-500 focus:border-blue-500">
                             </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-1">Pág. Programa</label>
-                                <input required type="number" min="0" id="paginasPrograma" class="w-full text-sm rounded-md border-gray-300 border p-2 focus:ring-blue-500 focus:border-blue-500">
-                            </div>
-                        </div>
 
-                        <div class="space-y-2 pt-2 border-t">
-                            <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-1 flex items-center gap-1">
-                                    <i class="fas fa-link text-xs"></i> Material de Origen (URL)
-                                </label>
-                                <input type="url" id="enlaceOrigen" placeholder="https://drive.google.com/..." class="w-full text-sm rounded-md border-gray-300 border p-2 text-gray-600">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700 mb-1">Profesor/a</label>
+                                    <input type="text" id="profesor" placeholder="Nombre del docente" class="w-full text-sm rounded-md border-gray-300 border p-2 focus:ring-blue-500 focus:border-blue-500">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700 mb-1">Fecha de Entrega</label>
+                                    <input type="date" id="fechaEntrega" class="w-full text-sm rounded-md border-gray-300 border p-2 focus:ring-blue-500 focus:border-blue-500 text-gray-600">
+                                </div>
                             </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-1 flex items-center gap-1">
-                                    <i class="fas fa-external-link-alt text-xs"></i> Material Cargado (URL)
-                                </label>
-                                <input type="url" id="enlaceDestino" placeholder="https://plataforma.edu/..." class="w-full text-sm rounded-md border-gray-300 border p-2 text-gray-600">
-                            </div>
-                        </div>
 
-                        <button type="submit" id="btn-submit" class="w-full bg-gray-900 text-white font-medium py-2 rounded-md hover:bg-gray-800 transition-colors mt-4 flex justify-center items-center gap-2">
-                            <span>Agregar a la lista</span>
-                        </button>
-                    </form>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700 mb-1">Pág. Módulo</label>
+                                    <input type="number" min="0" id="paginasModulo" class="w-full text-sm rounded-md border-gray-300 border p-2 focus:ring-blue-500 focus:border-blue-500">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700 mb-1">Pág. Programa</label>
+                                    <input type="number" min="0" id="paginasPrograma" class="w-full text-sm rounded-md border-gray-300 border p-2 focus:ring-blue-500 focus:border-blue-500">
+                                </div>
+                            </div>
+
+                            <div class="space-y-2 pt-2 border-t">
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700 mb-1 flex items-center gap-1">
+                                        <i class="fas fa-link text-xs"></i> Material de Origen (URL)
+                                    </label>
+                                    <input type="url" id="enlaceOrigen" placeholder="https://drive.google.com/..." class="w-full text-sm rounded-md border-gray-300 border p-2 text-gray-600">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700 mb-1 flex items-center gap-1">
+                                        <i class="fas fa-external-link-alt text-xs"></i> Material Cargado (URL)
+                                    </label>
+                                    <input type="url" id="enlaceDestino" placeholder="https://plataforma.edu/..." class="w-full text-sm rounded-md border-gray-300 border p-2 text-gray-600">
+                                </div>
+                            </div>
+
+                            <div class="flex gap-2 pt-2">
+                                <button type="button" id="btn-cancelar-edicion" onclick="cancelarEdicion()" class="hidden w-1/3 bg-gray-200 text-gray-700 font-medium py-2 rounded-md hover:bg-gray-300 transition-colors text-sm">
+                                    Cancelar
+                                </button>
+                                <button type="submit" id="btn-submit" class="flex-1 bg-gray-900 text-white font-medium py-2 rounded-md hover:bg-gray-800 transition-colors flex justify-center items-center gap-2">
+                                    <span id="btn-submit-text">Agregar a la lista</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
                 </div>
             </div>
 
@@ -174,7 +221,6 @@
 
     <!-- SCRIPT PRINCIPAL Y FIREBASE -->
     <script type="module">
-        // Importar Firebase versión 11.6.1 (Modular)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
         import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
@@ -190,12 +236,9 @@
             measurementId: "G-XGSL7NZE2T"
         };
 
-        // Inicializar Firebase
         const app = initializeApp(firebaseConfig);
         const analytics = getAnalytics(app);
         const db = getFirestore(app);
-        
-        // Referencia a la colección principal
         const modulosRef = collection(db, "modulos");
 
         // --- CONSTANTES ---
@@ -218,16 +261,10 @@
 
         // --- ESTADO LOCAL ---
         let modulos = [];
+        let moduloEditId = null; // Para saber si estamos editando
+        let porcentajeIncremento = parseInt(localStorage.getItem('incrementoModulos')) || 0;
 
-        // --- FUNCIONES AUXILIARES ---
-        const calcularCosto = (totalPaginas) => {
-            if (totalPaginas <= 0) return 0;
-            if (totalPaginas <= 80) return 42000;
-            if (totalPaginas <= 120) return 52500;
-            if (totalPaginas <= 140) return 63000;
-            return 73500; 
-        };
-
+        // --- FUNCIONES AUXILIARES Y DE CÁLCULO ---
         const formatearMoneda = (valor) => {
             return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(valor);
         };
@@ -238,14 +275,47 @@
             return `${d}/${m}/${y}`;
         }
 
+        const calcularCostoConIncremento = (totalPaginas) => {
+            if (totalPaginas <= 0) return 0;
+            let costoBase = 0;
+            if (totalPaginas <= 80) costoBase = 42000;
+            else if (totalPaginas <= 120) costoBase = 52500;
+            else if (totalPaginas <= 140) costoBase = 63000;
+            else costoBase = 73500;
+            
+            return costoBase * (1 + (porcentajeIncremento / 100));
+        };
+
         // --- INICIALIZACIÓN DE LA UI ---
-        const selectCarrera = document.getElementById('carreraId');
-        CARRERAS.forEach(c => {
-            const option = document.createElement('option');
-            option.value = c.id;
-            option.textContent = c.nombre;
-            selectCarrera.appendChild(option);
+        document.addEventListener('DOMContentLoaded', () => {
+            // Llenar select de carreras
+            const selectCarrera = document.getElementById('carreraId');
+            CARRERAS.forEach(c => {
+                const option = document.createElement('option');
+                option.value = c.id;
+                option.textContent = c.nombre;
+                selectCarrera.appendChild(option);
+            });
+
+            // Recuperar incremento guardado
+            document.getElementById('input-incremento').value = porcentajeIncremento;
+            window.renderizarTablaValores();
         });
+
+        // Evento que se dispara al escribir en el input de porcentaje
+        window.actualizarTablaValores = () => {
+            porcentajeIncremento = parseInt(document.getElementById('input-incremento').value) || 0;
+            localStorage.setItem('incrementoModulos', porcentajeIncremento);
+            window.renderizarTablaValores();
+        };
+
+        window.renderizarTablaValores = () => {
+            document.getElementById('val-80').textContent = formatearMoneda(42000 * (1 + porcentajeIncremento/100));
+            document.getElementById('val-120').textContent = formatearMoneda(52500 * (1 + porcentajeIncremento/100));
+            document.getElementById('val-140').textContent = formatearMoneda(63000 * (1 + porcentajeIncremento/100));
+            document.getElementById('val-141').textContent = formatearMoneda(73500 * (1 + porcentajeIncremento/100));
+        };
+
 
         // --- ESCUCHAR DATOS DE FIREBASE EN TIEMPO REAL ---
         const q = query(modulosRef, orderBy("createdAt", "desc"));
@@ -264,52 +334,98 @@
                 </div>`;
         });
 
-        // --- AGREGAR MÓDULO A FIREBASE ---
+        // --- GUARDAR O ACTUALIZAR MÓDULO ---
         document.getElementById('form-modulo').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btnSubmit = document.getElementById('btn-submit');
-            btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+            const textoOriginalBtn = document.getElementById('btn-submit-text').innerHTML;
+            document.getElementById('btn-submit-text').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
             btnSubmit.disabled = true;
 
             const pagMod = parseInt(document.getElementById('paginasModulo').value) || 0;
             const pagProg = parseInt(document.getElementById('paginasPrograma').value) || 0;
             const totalPaginas = pagMod + pagProg;
 
-            // Obtener modalidades seleccionadas
             const modalidadesCheckboxes = document.querySelectorAll('input[name="modalidad"]:checked');
             const modalidades = Array.from(modalidadesCheckboxes).map(cb => cb.value);
 
-            const nuevoModulo = {
+            const datosModulo = {
                 carreraId: document.getElementById('carreraId').value,
                 modalidades: modalidades,
-                nombre: document.getElementById('nombre').value,
-                profesor: document.getElementById('profesor').value,
-                fechaEntrega: document.getElementById('fechaEntrega').value,
+                nombre: document.getElementById('nombre').value || '',
+                profesor: document.getElementById('profesor').value || '',
+                fechaEntrega: document.getElementById('fechaEntrega').value || '',
                 paginasModulo: pagMod,
                 paginasPrograma: pagProg,
                 totalPaginas: totalPaginas,
-                costo: calcularCosto(totalPaginas),
-                enlaceOrigen: document.getElementById('enlaceOrigen').value,
-                enlaceDestino: document.getElementById('enlaceDestino').value,
-                estado: 'por_hacer',
-                createdAt: serverTimestamp()
+                costo: calcularCostoConIncremento(totalPaginas), // Se guarda con el costo calculado al momento de crear/editar
+                enlaceOrigen: document.getElementById('enlaceOrigen').value || '',
+                enlaceDestino: document.getElementById('enlaceDestino').value || ''
             };
 
             try {
-                await addDoc(modulosRef, nuevoModulo);
-                // Resetear form pero manteniendo selecciones limpias
-                e.target.reset();
-                document.getElementById('carreraId').value = CARRERAS[0].id;
+                if (moduloEditId) {
+                    // MODO EDICIÓN
+                    const moduloDoc = doc(db, "modulos", moduloEditId);
+                    await updateDoc(moduloDoc, datosModulo);
+                    window.cancelarEdicion();
+                } else {
+                    // MODO CREACIÓN
+                    datosModulo.estado = 'por_hacer';
+                    datosModulo.createdAt = serverTimestamp();
+                    // Generar un ticket aleatorio de 4 dígitos (Ej: 8392)
+                    datosModulo.ticket = Math.floor(1000 + Math.random() * 9000).toString(); 
+                    await addDoc(modulosRef, datosModulo);
+                    
+                    e.target.reset();
+                    document.getElementById('carreraId').value = CARRERAS[0].id;
+                }
             } catch (error) {
-                console.error("Error al agregar documento: ", error);
+                console.error("Error al guardar documento: ", error);
                 alert("Error al guardar en Firebase. Revisa la consola.");
             } finally {
-                btnSubmit.innerHTML = '<span>Agregar a la lista</span>';
+                document.getElementById('btn-submit-text').innerHTML = textoOriginalBtn;
                 btnSubmit.disabled = false;
             }
         });
 
-        // --- ACTUALIZAR ESTADO EN FIREBASE ---
+        // --- FUNCIONES DE EDICIÓN Y ESTADO ---
+        window.editarModulo = (id) => {
+            const modulo = modulos.find(m => m.id === id);
+            if (!modulo) return;
+
+            moduloEditId = id;
+            document.getElementById('carreraId').value = modulo.carreraId || CARRERAS[0].id;
+            
+            // Llenar modalidades
+            document.querySelectorAll('input[name="modalidad"]').forEach(cb => {
+                cb.checked = modulo.modalidades ? modulo.modalidades.includes(cb.value) : false;
+            });
+
+            document.getElementById('nombre').value = modulo.nombre || '';
+            document.getElementById('profesor').value = modulo.profesor || '';
+            document.getElementById('fechaEntrega').value = modulo.fechaEntrega || '';
+            document.getElementById('paginasModulo').value = modulo.paginasModulo || '';
+            document.getElementById('paginasPrograma').value = modulo.paginasPrograma || '';
+            document.getElementById('enlaceOrigen').value = modulo.enlaceOrigen || '';
+            document.getElementById('enlaceDestino').value = modulo.enlaceDestino || '';
+
+            // Cambiar la interfaz para reflejar la edición
+            document.getElementById('titulo-formulario').innerHTML = '<i class="fas fa-pen text-blue-600"></i> Editar Módulo';
+            document.getElementById('btn-submit-text').innerHTML = 'Guardar Cambios';
+            document.getElementById('btn-cancelar-edicion').classList.remove('hidden');
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        window.cancelarEdicion = () => {
+            moduloEditId = null;
+            document.getElementById('form-modulo').reset();
+            document.getElementById('titulo-formulario').innerHTML = '<i class="fas fa-plus text-green-600"></i> Nuevo Módulo';
+            document.getElementById('btn-submit-text').innerHTML = 'Agregar a la lista';
+            document.getElementById('btn-cancelar-edicion').classList.add('hidden');
+        };
+
         window.cambiarEstado = async (id, nuevoEstado) => {
             try {
                 const moduloDoc = doc(db, "modulos", id);
@@ -319,7 +435,6 @@
             }
         };
 
-        // --- ELIMINAR DE FIREBASE ---
         window.eliminarModulo = async (id) => {
             if (window.confirm('¿Estás seguro de eliminar este módulo? Esta acción no se puede deshacer.')) {
                 try {
@@ -370,8 +485,10 @@
                     ? modulo.modalidades.map(m => `<span class="bg-gray-100 border border-gray-200 text-gray-600 text-[10px] px-2 py-0.5 rounded uppercase font-semibold">${m}</span>`).join('')
                     : `<span class="text-gray-400 text-xs italic">Sin modalidad</span>`;
 
-                // Fecha de entrega formteada
                 const fechaFormat = formatearFechaLocal(modulo.fechaEntrega);
+                const nombreMostrar = modulo.nombre || 'Sin nombre asignado';
+                const profesorMostrar = modulo.profesor || 'Sin asignar';
+                const ticketMostrar = modulo.ticket || '0000';
 
                 html += `
                     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden relative group">
@@ -385,9 +502,12 @@
                                         <span class="text-xs font-bold px-2 py-1 rounded-full text-white inline-block shadow-sm" style="background-color: ${colorFondo}">${carrera?.nombre || 'Desconocida'}</span>
                                         ${modalidadesTags}
                                     </div>
-                                    <h3 class="text-lg font-bold text-gray-800">${modulo.nombre}</h3>
+                                    <h3 class="text-lg font-bold text-gray-800">
+                                        <span class="text-gray-400 font-mono text-sm mr-2" title="Ticket del módulo">#${ticketMostrar}</span>
+                                        ${nombreMostrar}
+                                    </h3>
                                     <p class="text-sm text-gray-600 mt-1">
-                                        <i class="fas fa-user text-gray-400 mr-1"></i> Prof: ${modulo.profesor} 
+                                        <i class="fas fa-user text-gray-400 mr-1"></i> Prof: ${profesorMostrar} 
                                         ${fechaFormat ? `<span class="ml-3"><i class="far fa-calendar-alt text-gray-400 mr-1"></i> Entrega: ${fechaFormat}</span>` : ''}
                                     </p>
                                 </div>
@@ -397,6 +517,10 @@
                                         ${selectOptions}
                                     </select>
                                     
+                                    <button onclick="editarModulo('${modulo.id}')" class="text-blue-500 hover:text-blue-700 p-2 transition-colors rounded-full hover:bg-blue-50" title="Editar módulo">
+                                        <i class="fas fa-pen"></i>
+                                    </button>
+
                                     <button onclick="eliminarModulo('${modulo.id}')" class="text-gray-400 hover:text-red-500 p-2 transition-colors rounded-full hover:bg-red-50" title="Eliminar módulo">
                                         <i class="fas fa-trash-alt"></i>
                                     </button>
@@ -443,17 +567,16 @@
             const realizados = modulos.filter(m => m.estado === 'realizado');
             const totalFacturar = realizados.reduce((acc, m) => acc + m.costo, 0);
 
-            // Generar HTML con estilos en línea (inline styles) para que al copiar y pegar,
-            // el cliente de correo (Gmail, Outlook) respete la estructura de tabla y colores.
             let correoHTML = `<div style="font-family: Arial, Helvetica, sans-serif; color: #333; line-height: 1.5;">`;
             correoHTML += `<p>Gus y Vicky, buenos días!</p>`;
             correoHTML += `<p>A continuación adjunto factura y detalle de los módulos maquetados en el último periodo, pongo en copia a Servicios Educativos.</p>`;
             
             if (realizados.length > 0) {
                 correoHTML += `<br>`;
-                correoHTML += `<table style="width: 100%; max-width: 900px; border-collapse: collapse; margin-bottom: 20px; font-family: Arial, sans-serif; font-size: 13px;">
+                correoHTML += `<table style="width: 100%; max-width: 950px; border-collapse: collapse; margin-bottom: 20px; font-family: Arial, sans-serif; font-size: 13px;">
                     <thead>
                         <tr style="background-color: #f3f4f6;">
+                            <th style="border: 1px solid #d1d5db; padding: 10px; text-align: left;">Ticket</th>
                             <th style="border: 1px solid #d1d5db; padding: 10px; text-align: left;">Módulo</th>
                             <th style="border: 1px solid #d1d5db; padding: 10px; text-align: left;">Carrera</th>
                             <th style="border: 1px solid #d1d5db; padding: 10px; text-align: left;">Modalidad</th>
@@ -465,26 +588,30 @@
                     <tbody>`;
                 
                 realizados.forEach(m => {
-                    const carreraNombre = CARRERAS.find(c => c.id === m.carreraId)?.nombre || 'Desconocida';
+                    const carreraNombre = CARRERAS.find(c => c.id === m.carreraId)?.nombre || '-';
                     const modsStr = (m.modalidades && m.modalidades.length > 0) ? m.modalidades.join(', ') : '-';
                     
                     correoHTML += `<tr>
-                        <td style="border: 1px solid #d1d5db; padding: 8px;"><b>${m.nombre}</b></td>
+                        <td style="border: 1px solid #d1d5db; padding: 8px; color: #666;">#${m.ticket || '0000'}</td>
+                        <td style="border: 1px solid #d1d5db; padding: 8px;"><b>${m.nombre || 'S/N'}</b></td>
                         <td style="border: 1px solid #d1d5db; padding: 8px;">${carreraNombre}</td>
                         <td style="border: 1px solid #d1d5db; padding: 8px;">${modsStr}</td>
-                        <td style="border: 1px solid #d1d5db; padding: 8px;">${m.profesor}</td>
+                        <td style="border: 1px solid #d1d5db; padding: 8px;">${m.profesor || '-'}</td>
                         <td style="border: 1px solid #d1d5db; padding: 8px; text-align: center;">${m.totalPaginas}</td>
                         <td style="border: 1px solid #d1d5db; padding: 8px; text-align: right; white-space: nowrap;">${formatearMoneda(m.costo)}</td>
                     </tr>`;
                 });
                 
                 correoHTML += `<tr style="background-color: #eff6ff;">
-                    <td colspan="5" style="border: 1px solid #d1d5db; padding: 12px; text-align: right; font-weight: bold; color: #1e3a8a;">TOTAL A FACTURAR:</td>
+                    <td colspan="6" style="border: 1px solid #d1d5db; padding: 12px; text-align: right; font-weight: bold; color: #1e3a8a;">TOTAL A FACTURAR:</td>
                     <td style="border: 1px solid #d1d5db; padding: 12px; text-align: right; font-weight: bold; color: #1e3a8a; white-space: nowrap;">${formatearMoneda(totalFacturar)}</td>
                 </tr></tbody></table>`;
             } else {
                 correoHTML += `<p style="color: #666; font-style: italic;">[No hay módulos marcados como "Realizado" en este periodo]</p>`;
             }
+
+            // Calculamos los precios actualizados para la tabla de referencia final
+            const baseActualizada = (base) => formatearMoneda(base * (1 + porcentajeIncremento/100));
 
             correoHTML += `<br>`;
             correoHTML += `<p style="font-weight: bold; margin-bottom: 8px; font-size: 13px;">--- REFERENCIA DE VALORES ---</p>`;
@@ -492,30 +619,28 @@
                 <tbody>
                     <tr>
                         <td style="border: 1px solid #e5e7eb; padding: 6px 10px; background-color: #f9fafb;">Hasta 80 páginas</td>
-                        <td style="border: 1px solid #e5e7eb; padding: 6px 10px; text-align: right; font-weight: 500;">$42.000</td>
+                        <td style="border: 1px solid #e5e7eb; padding: 6px 10px; text-align: right; font-weight: 500;">${baseActualizada(42000)}</td>
                     </tr>
                     <tr>
                         <td style="border: 1px solid #e5e7eb; padding: 6px 10px; background-color: #f9fafb;">81 a 120 páginas</td>
-                        <td style="border: 1px solid #e5e7eb; padding: 6px 10px; text-align: right; font-weight: 500;">$52.500</td>
+                        <td style="border: 1px solid #e5e7eb; padding: 6px 10px; text-align: right; font-weight: 500;">${baseActualizada(52500)}</td>
                     </tr>
                     <tr>
                         <td style="border: 1px solid #e5e7eb; padding: 6px 10px; background-color: #f9fafb;">121 a 140 páginas</td>
-                        <td style="border: 1px solid #e5e7eb; padding: 6px 10px; text-align: right; font-weight: 500;">$63.000</td>
+                        <td style="border: 1px solid #e5e7eb; padding: 6px 10px; text-align: right; font-weight: 500;">${baseActualizada(63000)}</td>
                     </tr>
                     <tr>
                         <td style="border: 1px solid #e5e7eb; padding: 6px 10px; background-color: #f9fafb;">Más de 141 páginas</td>
-                        <td style="border: 1px solid #e5e7eb; padding: 6px 10px; text-align: right; font-weight: 500;">$73.500</td>
+                        <td style="border: 1px solid #e5e7eb; padding: 6px 10px; text-align: right; font-weight: 500;">${baseActualizada(73500)}</td>
                     </tr>
                 </tbody>
             </table>`;
             correoHTML += `</div>`;
 
-            // Insertamos el HTML renderizado en el div editable
             document.getElementById('texto-correo').innerHTML = correoHTML;
             document.getElementById('modal-correo').classList.remove('hidden');
             document.getElementById('modal-correo').classList.add('flex');
             
-            // Resetear botón copiar
             const btn = document.getElementById('btn-copiar');
             btn.className = "flex items-center gap-2 px-4 py-2 font-medium rounded-lg transition-colors bg-blue-600 hover:bg-blue-700 text-white shadow-sm";
             document.getElementById('icono-copiar').className = "fas fa-copy";
@@ -527,11 +652,8 @@
             document.getElementById('modal-correo').classList.remove('flex');
         };
 
-        // Copia el HTML renderizado (Rich Text) en lugar de solo texto plano
         window.copiarAlPortapapeles = () => {
             const divContenido = document.getElementById('texto-correo');
-            
-            // Seleccionar todo el contenido del div
             const range = document.createRange();
             range.selectNodeContents(divContenido);
             const selection = window.getSelection();
@@ -543,10 +665,7 @@
                 btn.className = "flex items-center gap-2 px-4 py-2 font-medium rounded-lg transition-colors bg-green-600 hover:bg-green-700 text-white shadow-sm";
                 document.getElementById('icono-copiar').className = "fas fa-check-circle";
                 document.getElementById('texto-btn-copiar').textContent = "¡Copiado con formato!";
-                
-                // Quitar la selección visual para que quede más prolijo
                 selection.removeAllRanges();
-
                 setTimeout(() => {
                     btn.className = "flex items-center gap-2 px-4 py-2 font-medium rounded-lg transition-colors bg-blue-600 hover:bg-blue-700 text-white shadow-sm";
                     document.getElementById('icono-copiar').className = "fas fa-copy";
@@ -555,12 +674,11 @@
             };
 
             try {
-                // El navegador copia el formato HTML rico que luego es pegable en correos
                 document.execCommand('copy');
                 exitoUI();
             } catch (err) {
-                console.error('Error al copiar el contenido HTML', err);
-                alert("Tu navegador no soporta el copiado automático. Por favor, selecciona el texto de la caja, presiona Ctrl+C y luego pégalo en tu correo.");
+                console.error('Error al copiar', err);
+                alert("Tu navegador no soporta el copiado automático. Usa Ctrl+C.");
             }
         };
     </script>

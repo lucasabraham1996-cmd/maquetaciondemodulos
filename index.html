@@ -25,7 +25,7 @@
     <div class="max-w-7xl mx-auto space-y-6">
         
         <!-- ENCABEZADO Y RESUMEN -->
-        <div class="bg-white rounded-xl shadow-sm p-6 flex flex-col md:flex-row justify-between items-center border border-gray-100 gap-4">
+        <div class="bg-white rounded-xl shadow-sm p-6 flex flex-col lg:flex-row justify-between items-center border border-gray-100 gap-4">
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
                     <i class="fas fa-book-open text-blue-600"></i>
@@ -34,8 +34,15 @@
                 <p class="text-gray-500 text-sm mt-1">Control de módulos, páginas y facturación</p>
             </div>
             
-            <div class="flex items-center gap-4">
-                <div class="bg-green-50 border border-green-200 rounded-lg p-3 text-center">
+            <div class="flex flex-wrap items-center justify-center gap-4">
+                <!-- Calculador Por Hacer -->
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-center min-w-[140px] shadow-sm">
+                    <span class="block text-xs font-semibold text-yellow-700 uppercase tracking-wider">Calculador: Por Hacer</span>
+                    <span id="total-por-hacer" class="block text-xl font-bold text-yellow-700">$ 0</span>
+                </div>
+
+                <!-- Calculador A Cobrar -->
+                <div class="bg-green-50 border border-green-200 rounded-lg p-3 text-center min-w-[140px] shadow-sm">
                     <span class="block text-xs font-semibold text-green-700 uppercase tracking-wider">A Cobrar (Realizados)</span>
                     <span id="total-cobrar" class="block text-2xl font-bold text-green-700">$ 0</span>
                 </div>
@@ -55,39 +62,28 @@
                     
                     <!-- REFERENCIA DE VALORES E INCREMENTO -->
                     <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-                        <h2 class="text-lg font-semibold mb-4 border-b pb-2 flex items-center gap-2">
-                            <i class="fas fa-tags text-blue-600"></i> Referencia de Valores
-                        </h2>
+                        <div class="flex justify-between items-center mb-4 border-b pb-2">
+                            <h2 class="text-lg font-semibold flex items-center gap-2">
+                                <i class="fas fa-tags text-blue-600"></i> Referencia de Precios
+                            </h2>
+                            <button onclick="abrirModalPrecios()" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-1 rounded font-medium transition-colors">
+                                <i class="fas fa-cog"></i> Editar
+                            </button>
+                        </div>
                         
-                        <div class="mb-4 bg-gray-50 p-3 rounded-lg border border-gray-200">
-                            <label class="block text-xs font-bold text-gray-700 mb-1">Aumento / Incremento (%)</label>
-                            <div class="flex items-center gap-2">
-                                <input type="number" id="input-incremento" value="0" min="0" class="w-full text-sm rounded-md border-gray-300 border p-2 focus:ring-blue-500 focus:border-blue-500" oninput="actualizarTablaValores()">
-                                <span class="text-gray-500 font-bold">%</span>
-                            </div>
-                            <p class="text-[10px] text-gray-500 mt-1">Al crear o editar un módulo, su costo se calculará con este porcentaje.</p>
+                        <div class="mb-4 bg-gray-50 p-3 rounded-lg border border-gray-200 flex justify-between items-center">
+                            <span class="text-sm font-bold text-gray-700">Aumento Activo:</span>
+                            <span class="text-lg font-bold text-blue-600" id="display-incremento-sidebar">0%</span>
                         </div>
 
-                        <table class="w-full text-sm text-left text-gray-600">
-                            <tbody>
-                                <tr class="border-b border-gray-100">
-                                    <td class="py-2">Hasta 80 pág.</td>
-                                    <td class="py-2 text-right font-bold text-gray-800" id="val-80">$ 42.000</td>
-                                </tr>
-                                <tr class="border-b border-gray-100">
-                                    <td class="py-2">81 a 120 pág.</td>
-                                    <td class="py-2 text-right font-bold text-gray-800" id="val-120">$ 52.500</td>
-                                </tr>
-                                <tr class="border-b border-gray-100">
-                                    <td class="py-2">121 a 140 pág.</td>
-                                    <td class="py-2 text-right font-bold text-gray-800" id="val-140">$ 63.000</td>
-                                </tr>
-                                <tr>
-                                    <td class="py-2">Más de 141 pág.</td>
-                                    <td class="py-2 text-right font-bold text-gray-800" id="val-141">$ 73.500</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <div class="max-h-60 overflow-y-auto pr-2">
+                            <table class="w-full text-sm text-left text-gray-600">
+                                <tbody id="tabla-valores-body">
+                                    <!-- Generado por JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="text-[10px] text-gray-400 mt-3 text-center">Al crear o editar un módulo, se usará la tabla actual.</p>
                     </div>
 
                     <!-- FORMULARIO DE INGRESO / EDICIÓN -->
@@ -101,6 +97,14 @@
                                 <label class="block text-xs font-medium text-gray-700 mb-1">Carrera</label>
                                 <select id="carreraId" class="w-full text-sm rounded-md border-gray-300 border p-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-50">
                                     <!-- Llenado por JS -->
+                                </select>
+                            </div>
+
+                            <!-- Tipo de Tarifa -->
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1 text-blue-600"><i class="fas fa-file-invoice-dollar"></i> Tipo de Tarifa a Aplicar</label>
+                                <select id="tipoTarifa" class="w-full text-sm rounded-md border-blue-300 border p-2 focus:ring-blue-500 focus:border-blue-500 bg-blue-50 font-medium">
+                                    <!-- Llenado dinámicamente -->
                                 </select>
                             </div>
 
@@ -124,7 +128,7 @@
                             </div>
 
                             <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-1">Nombre del Módulo</label>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Nombre del Módulo / Ítem</label>
                                 <input type="text" id="nombre" placeholder="Ej: Marketing Digital I" class="w-full text-sm rounded-md border-gray-300 border p-2 focus:ring-blue-500 focus:border-blue-500">
                             </div>
 
@@ -139,14 +143,14 @@
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-2 gap-3">
+                            <div class="grid grid-cols-2 gap-3 p-3 bg-gray-50 border border-gray-200 rounded-lg">
                                 <div>
                                     <label class="block text-xs font-medium text-gray-700 mb-1">Pág. Módulo</label>
-                                    <input type="number" min="0" id="paginasModulo" class="w-full text-sm rounded-md border-gray-300 border p-2 focus:ring-blue-500 focus:border-blue-500">
+                                    <input type="number" min="0" id="paginasModulo" class="w-full text-sm rounded-md border-gray-300 border p-2 focus:ring-blue-500 focus:border-blue-500 bg-white">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium text-gray-700 mb-1">Pág. Programa</label>
-                                    <input type="number" min="0" id="paginasPrograma" class="w-full text-sm rounded-md border-gray-300 border p-2 focus:ring-blue-500 focus:border-blue-500">
+                                    <input type="number" min="0" id="paginasPrograma" class="w-full text-sm rounded-md border-gray-300 border p-2 focus:ring-blue-500 focus:border-blue-500 bg-white">
                                 </div>
                             </div>
 
@@ -169,7 +173,7 @@
                                 <button type="button" id="btn-cancelar-edicion" onclick="cancelarEdicion()" class="hidden w-1/3 bg-gray-200 text-gray-700 font-medium py-2 rounded-md hover:bg-gray-300 transition-colors text-sm">
                                     Cancelar
                                 </button>
-                                <button type="submit" id="btn-submit" class="flex-1 bg-gray-900 text-white font-medium py-2 rounded-md hover:bg-gray-800 transition-colors flex justify-center items-center gap-2">
+                                <button type="submit" id="btn-submit" class="flex-1 bg-gray-900 text-white font-medium py-2 rounded-md hover:bg-gray-800 transition-colors flex justify-center items-center gap-2 shadow-sm">
                                     <span id="btn-submit-text">Agregar a la lista</span>
                                 </button>
                             </div>
@@ -181,11 +185,67 @@
 
             <!-- LISTA DE MÓDULOS -->
             <div class="lg:col-span-2 space-y-4" id="lista-modulos">
-                <!-- Estado de carga inicial -->
                 <div class="bg-white border border-dashed border-gray-300 rounded-xl p-10 text-center text-gray-500">
                     <i class="fas fa-spinner fa-spin fa-2x text-blue-500 mb-3"></i>
                     <p>Cargando módulos desde Firebase...</p>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CONFIGURACIÓN PRECIOS -->
+    <div id="modal-precios" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center p-4 z-[60]">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="p-4 border-b bg-gray-50 flex justify-between items-center">
+                <h3 class="font-bold text-lg flex items-center gap-2">
+                    <i class="fas fa-sliders-h text-blue-600"></i> Configurar Referencia de Precios
+                </h3>
+                <button onclick="cerrarModalPrecios()" class="text-gray-400 hover:text-gray-700 font-bold text-xl">&times;</button>
+            </div>
+            
+            <div class="p-5 flex-1 overflow-y-auto space-y-6 bg-white" id="contenedor-configuracion">
+                <!-- Incremento -->
+                <div class="bg-blue-50 border border-blue-200 p-4 rounded-lg">
+                    <label class="block text-sm font-bold text-blue-900 mb-2">Incremento General (%)</label>
+                    <div class="flex items-center gap-2 w-1/3">
+                        <input type="number" id="config-incremento" min="0" class="w-full rounded border-blue-300 p-2 text-right">
+                        <span class="font-bold text-blue-800">%</span>
+                    </div>
+                    <p class="text-xs text-blue-700 mt-2">Este porcentaje se suma automáticamente a los valores base configurados abajo.</p>
+                </div>
+
+                <!-- Categorías por Páginas -->
+                <div>
+                    <div class="flex justify-between items-center mb-3">
+                        <h4 class="font-bold text-gray-800"><i class="fas fa-file-alt text-gray-500"></i> Categorías por Cantidad de Páginas</h4>
+                        <button onclick="agregarFilaPaginas()" class="text-xs bg-gray-900 text-white px-2 py-1 rounded hover:bg-gray-700 transition-colors">+ Rango</button>
+                    </div>
+                    <div id="lista-config-paginas" class="space-y-2">
+                        <!-- Llenado por JS -->
+                    </div>
+                    <p class="text-[10px] text-gray-500 mt-2">Usa un número muy alto (ej: 9999) para el rango final "Más de...".</p>
+                </div>
+
+                <!-- Categorías Especiales Fijas -->
+                <div class="pt-4 border-t border-gray-200">
+                    <div class="flex justify-between items-center mb-3">
+                        <h4 class="font-bold text-gray-800"><i class="fas fa-star text-yellow-500"></i> Categorías Especiales (Sin Páginas)</h4>
+                        <button onclick="agregarFilaExtra()" class="text-xs bg-gray-900 text-white px-2 py-1 rounded hover:bg-gray-700 transition-colors">+ Categoría</button>
+                    </div>
+                    <div id="lista-config-extras" class="space-y-2">
+                        <!-- Llenado por JS -->
+                    </div>
+                    <p class="text-[10px] text-gray-500 mt-2">Útil para cobrar tareas fijas (diseño, revisión, etc.) independientemente del número de páginas.</p>
+                </div>
+            </div>
+            
+            <div class="p-4 border-t bg-gray-50 flex justify-end gap-3">
+                <button onclick="cerrarModalPrecios()" class="px-4 py-2 text-gray-600 font-medium hover:bg-gray-200 rounded-lg transition-colors">
+                    Cancelar
+                </button>
+                <button onclick="guardarPrecios()" class="flex items-center gap-2 px-4 py-2 font-medium rounded-lg transition-colors bg-green-600 hover:bg-green-700 text-white shadow-sm">
+                    <i class="fas fa-save"></i> Guardar Cambios
+                </button>
             </div>
         </div>
     </div>
@@ -195,17 +255,16 @@
         <div class="bg-white rounded-xl shadow-xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[90vh]">
             <div class="p-4 border-b bg-gray-50 flex justify-between items-center">
                 <h3 class="font-bold text-lg flex items-center gap-2">
-                    <i class="fas fa-envelope text-blue-600"></i> Plantilla de Correo (Formato Enriquecido)
+                    <i class="fas fa-envelope text-blue-600"></i> Plantilla de Correo (Texto Limpio)
                 </h3>
                 <button onclick="cerrarModalCorreo()" class="text-gray-400 hover:text-gray-700 font-bold text-xl">&times;</button>
             </div>
             
             <div class="p-4 flex-1 overflow-y-auto bg-gray-100">
-                <!-- Usamos un div contenteditable para que soporte copiar tablas HTML y estilos en línea -->
                 <div id="texto-correo" class="w-full min-h-[16rem] p-6 text-sm font-sans bg-white border border-gray-200 shadow-sm rounded-lg focus:outline-none" contenteditable="true">
                     <!-- HTML del correo irá aquí -->
                 </div>
-                <p class="text-xs text-gray-500 mt-2 text-center"><i class="fas fa-info-circle"></i> Al copiar, se mantendrán las tablas y formatos para pegar directo en Gmail/Outlook.</p>
+                <p class="text-xs text-gray-500 mt-2 text-center"><i class="fas fa-info-circle"></i> Ahora el texto base no tiene recuadros y se pegará de forma natural.</p>
             </div>
             
             <div class="p-4 border-t bg-gray-50 flex justify-end gap-3">
@@ -259,12 +318,25 @@
             { id: 'abonado', nombre: 'Abonado', colorClase: 'text-blue-600 bg-blue-100' },
         ];
 
-        // --- ESTADO LOCAL ---
+        // --- ESTADO LOCAL Y PRECIOS ---
         let modulos = [];
-        let moduloEditId = null; // Para saber si estamos editando
-        let porcentajeIncremento = parseInt(localStorage.getItem('incrementoModulos')) || 0;
+        let moduloEditId = null; 
 
-        // --- FUNCIONES AUXILIARES Y DE CÁLCULO ---
+        // Valores por defecto si no hay guardados
+        const defaultPrecios = {
+            incremento: 0,
+            porPaginas: [
+                { id: 'p1', limite: 80, precioBase: 42000 },
+                { id: 'p2', limite: 120, precioBase: 52500 },
+                { id: 'p3', limite: 140, precioBase: 63000 },
+                { id: 'p4', limite: 99999, precioBase: 73500 }
+            ],
+            extras: []
+        };
+
+        let preciosRef = JSON.parse(localStorage.getItem('preciosMaquetacionConfig')) || defaultPrecios;
+
+        // --- FUNCIONES AUXILIARES ---
         const formatearMoneda = (valor) => {
             return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(valor);
         };
@@ -275,20 +347,26 @@
             return `${d}/${m}/${y}`;
         }
 
-        const calcularCostoConIncremento = (totalPaginas) => {
-            if (totalPaginas <= 0) return 0;
+        const calcularCostoActivo = (tipoTarifa, totalPaginas) => {
             let costoBase = 0;
-            if (totalPaginas <= 80) costoBase = 42000;
-            else if (totalPaginas <= 120) costoBase = 52500;
-            else if (totalPaginas <= 140) costoBase = 63000;
-            else costoBase = 73500;
             
-            return costoBase * (1 + (porcentajeIncremento / 100));
+            if (tipoTarifa === 'paginas') {
+                if (totalPaginas <= 0) return 0;
+                // Ordenar rangos de menor a mayor
+                const rangos = [...preciosRef.porPaginas].sort((a,b) => a.limite - b.limite);
+                const rangoEncontrado = rangos.find(r => totalPaginas <= r.limite);
+                costoBase = rangoEncontrado ? rangoEncontrado.precioBase : rangos[rangos.length - 1].precioBase;
+            } else {
+                // Es un extra
+                const extra = preciosRef.extras.find(e => e.id === tipoTarifa);
+                costoBase = extra ? extra.precioBase : 0;
+            }
+
+            return costoBase * (1 + (preciosRef.incremento / 100));
         };
 
         // --- INICIALIZACIÓN DE LA UI ---
         document.addEventListener('DOMContentLoaded', () => {
-            // Llenar select de carreras
             const selectCarrera = document.getElementById('carreraId');
             CARRERAS.forEach(c => {
                 const option = document.createElement('option');
@@ -297,23 +375,148 @@
                 selectCarrera.appendChild(option);
             });
 
-            // Recuperar incremento guardado
-            document.getElementById('input-incremento').value = porcentajeIncremento;
-            window.renderizarTablaValores();
+            actualizarUICfgPrecios();
         });
 
-        // Evento que se dispara al escribir en el input de porcentaje
-        window.actualizarTablaValores = () => {
-            porcentajeIncremento = parseInt(document.getElementById('input-incremento').value) || 0;
-            localStorage.setItem('incrementoModulos', porcentajeIncremento);
-            window.renderizarTablaValores();
+        // Actualiza tabla lateral y selects
+        const actualizarUICfgPrecios = () => {
+            document.getElementById('display-incremento-sidebar').textContent = `${preciosRef.incremento}%`;
+            
+            // Actualizar Select de Tarifa
+            const selectTarifa = document.getElementById('tipoTarifa');
+            selectTarifa.innerHTML = `<option value="paginas" class="font-bold text-gray-800">📊 Automático por Páginas</option>`;
+            
+            if(preciosRef.extras.length > 0) {
+                const group = document.createElement('optgroup');
+                group.label = "Categorías Fijas (Sin Pág)";
+                preciosRef.extras.forEach(e => {
+                    const opt = document.createElement('option');
+                    opt.value = e.id;
+                    opt.textContent = `⭐ ${e.nombre}`;
+                    group.appendChild(opt);
+                });
+                selectTarifa.appendChild(group);
+            }
+
+            // Renderizar Tabla Lateral
+            let htmlTabla = '';
+            const incremento = preciosRef.incremento;
+            const calc = (val) => formatearMoneda(val * (1 + incremento/100));
+
+            let rangos = [...preciosRef.porPaginas].sort((a,b) => a.limite - b.limite);
+            let limitAnterior = 0;
+            
+            rangos.forEach((r, idx) => {
+                let label = '';
+                if (idx === 0) {
+                    label = `Hasta ${r.limite} pág.`;
+                } else if (r.limite >= 9999) {
+                    label = `Más de ${limitAnterior} pág.`;
+                } else {
+                    label = `${limitAnterior + 1} a ${r.limite} pág.`;
+                }
+                limitAnterior = r.limite;
+
+                htmlTabla += `<tr class="border-b border-gray-100">
+                            <td class="py-2.5">${label}</td>
+                            <td class="py-2.5 text-right font-bold text-gray-800">${calc(r.precioBase)}</td>
+                        </tr>`;
+            });
+
+            if(preciosRef.extras.length > 0) {
+                htmlTabla += `<tr><td colspan="2" class="pt-4 pb-2 text-xs font-bold text-blue-600 uppercase tracking-wide border-b border-gray-100">Categorías Especiales</td></tr>`;
+                preciosRef.extras.forEach(e => {
+                    htmlTabla += `<tr class="border-b border-gray-100">
+                                <td class="py-2.5 text-gray-600"><i class="fas fa-star text-yellow-500 text-[10px] mr-1"></i> ${e.nombre}</td>
+                                <td class="py-2.5 text-right font-bold text-gray-800">${calc(e.precioBase)}</td>
+                            </tr>`;
+                });
+            }
+
+            document.getElementById('tabla-valores-body').innerHTML = htmlTabla;
         };
 
-        window.renderizarTablaValores = () => {
-            document.getElementById('val-80').textContent = formatearMoneda(42000 * (1 + porcentajeIncremento/100));
-            document.getElementById('val-120').textContent = formatearMoneda(52500 * (1 + porcentajeIncremento/100));
-            document.getElementById('val-140').textContent = formatearMoneda(63000 * (1 + porcentajeIncremento/100));
-            document.getElementById('val-141').textContent = formatearMoneda(73500 * (1 + porcentajeIncremento/100));
+
+        // --- LÓGICA MODAL EDICIÓN PRECIOS ---
+        window.abrirModalPrecios = () => {
+            document.getElementById('config-incremento').value = preciosRef.incremento;
+            
+            const contPaginas = document.getElementById('lista-config-paginas');
+            contPaginas.innerHTML = '';
+            [...preciosRef.porPaginas].sort((a,b) => a.limite - b.limite).forEach(r => {
+                contPaginas.insertAdjacentHTML('beforeend', crearFilaPaginas(r.id, r.limite, r.precioBase));
+            });
+
+            const contExtras = document.getElementById('lista-config-extras');
+            contExtras.innerHTML = '';
+            preciosRef.extras.forEach(e => {
+                contExtras.insertAdjacentHTML('beforeend', crearFilaExtra(e.id, e.nombre, e.precioBase));
+            });
+
+            document.getElementById('modal-precios').classList.remove('hidden');
+            document.getElementById('modal-precios').classList.add('flex');
+        };
+
+        window.cerrarModalPrecios = () => {
+            document.getElementById('modal-precios').classList.add('hidden');
+            document.getElementById('modal-precios').classList.remove('flex');
+        };
+
+        const crearFilaPaginas = (id, limite, precio) => {
+            return `
+            <div class="flex items-center gap-2 fila-pagina" data-id="${id}">
+                <span class="text-sm text-gray-600 w-16">Hasta:</span>
+                <input type="number" class="w-24 border border-gray-300 rounded p-1 text-sm input-limite" value="${limite}">
+                <span class="text-sm text-gray-600">pág = $</span>
+                <input type="number" class="flex-1 border border-gray-300 rounded p-1 text-sm input-precio" value="${precio}">
+                <button onclick="this.parentElement.remove()" class="text-red-500 hover:bg-red-50 p-1.5 rounded"><i class="fas fa-trash"></i></button>
+            </div>`;
+        };
+
+        const crearFilaExtra = (id, nombre, precio) => {
+            return `
+            <div class="flex items-center gap-2 fila-extra" data-id="${id}">
+                <input type="text" class="flex-1 border border-gray-300 rounded p-1 text-sm input-nombre" value="${nombre}" placeholder="Nombre categoría">
+                <span class="text-sm text-gray-600"> = $</span>
+                <input type="number" class="w-32 border border-gray-300 rounded p-1 text-sm input-precio" value="${precio}" placeholder="Precio Base">
+                <button onclick="this.parentElement.remove()" class="text-red-500 hover:bg-red-50 p-1.5 rounded"><i class="fas fa-trash"></i></button>
+            </div>`;
+        };
+
+        window.agregarFilaPaginas = () => {
+            document.getElementById('lista-config-paginas').insertAdjacentHTML('beforeend', crearFilaPaginas('p_'+Date.now(), '', ''));
+        };
+
+        window.agregarFilaExtra = () => {
+            document.getElementById('lista-config-extras').insertAdjacentHTML('beforeend', crearFilaExtra('e_'+Date.now(), '', ''));
+        };
+
+        window.guardarPrecios = () => {
+            const incremento = parseFloat(document.getElementById('config-incremento').value) || 0;
+            
+            const nuevasPaginas = [];
+            document.querySelectorAll('.fila-pagina').forEach(fila => {
+                const limite = parseInt(fila.querySelector('.input-limite').value) || 0;
+                const precio = parseFloat(fila.querySelector('.input-precio').value) || 0;
+                nuevasPaginas.push({ id: fila.dataset.id, limite, precioBase: precio });
+            });
+
+            const nuevosExtras = [];
+            document.querySelectorAll('.fila-extra').forEach(fila => {
+                const nombre = fila.querySelector('.input-nombre').value.trim() || 'Sin Nombre';
+                const precio = parseFloat(fila.querySelector('.input-precio').value) || 0;
+                nuevosExtras.push({ id: fila.dataset.id, nombre, precioBase: precio });
+            });
+
+            preciosRef = {
+                incremento,
+                porPaginas: nuevasPaginas,
+                extras: nuevosExtras
+            };
+
+            localStorage.setItem('preciosMaquetacionConfig', JSON.stringify(preciosRef));
+            actualizarUICfgPrecios();
+            cerrarModalPrecios();
         };
 
 
@@ -345,12 +548,14 @@
             const pagMod = parseInt(document.getElementById('paginasModulo').value) || 0;
             const pagProg = parseInt(document.getElementById('paginasPrograma').value) || 0;
             const totalPaginas = pagMod + pagProg;
+            const tipoTarifa = document.getElementById('tipoTarifa').value;
 
             const modalidadesCheckboxes = document.querySelectorAll('input[name="modalidad"]:checked');
             const modalidades = Array.from(modalidadesCheckboxes).map(cb => cb.value);
 
             const datosModulo = {
                 carreraId: document.getElementById('carreraId').value,
+                tipoTarifa: tipoTarifa,
                 modalidades: modalidades,
                 nombre: document.getElementById('nombre').value || '',
                 profesor: document.getElementById('profesor').value || '',
@@ -358,27 +563,25 @@
                 paginasModulo: pagMod,
                 paginasPrograma: pagProg,
                 totalPaginas: totalPaginas,
-                costo: calcularCostoConIncremento(totalPaginas), // Se guarda con el costo calculado al momento de crear/editar
+                costo: calcularCostoActivo(tipoTarifa, totalPaginas), 
                 enlaceOrigen: document.getElementById('enlaceOrigen').value || '',
                 enlaceDestino: document.getElementById('enlaceDestino').value || ''
             };
 
             try {
                 if (moduloEditId) {
-                    // MODO EDICIÓN
                     const moduloDoc = doc(db, "modulos", moduloEditId);
                     await updateDoc(moduloDoc, datosModulo);
                     window.cancelarEdicion();
                 } else {
-                    // MODO CREACIÓN
                     datosModulo.estado = 'por_hacer';
                     datosModulo.createdAt = serverTimestamp();
-                    // Generar un ticket aleatorio de 4 dígitos (Ej: 8392)
                     datosModulo.ticket = Math.floor(1000 + Math.random() * 9000).toString(); 
                     await addDoc(modulosRef, datosModulo);
                     
                     e.target.reset();
                     document.getElementById('carreraId').value = CARRERAS[0].id;
+                    document.getElementById('tipoTarifa').value = 'paginas';
                 }
             } catch (error) {
                 console.error("Error al guardar documento: ", error);
@@ -396,8 +599,8 @@
 
             moduloEditId = id;
             document.getElementById('carreraId').value = modulo.carreraId || CARRERAS[0].id;
+            document.getElementById('tipoTarifa').value = modulo.tipoTarifa || 'paginas';
             
-            // Llenar modalidades
             document.querySelectorAll('input[name="modalidad"]').forEach(cb => {
                 cb.checked = modulo.modalidades ? modulo.modalidades.includes(cb.value) : false;
             });
@@ -410,7 +613,6 @@
             document.getElementById('enlaceOrigen').value = modulo.enlaceOrigen || '';
             document.getElementById('enlaceDestino').value = modulo.enlaceDestino || '';
 
-            // Cambiar la interfaz para reflejar la edición
             document.getElementById('titulo-formulario').innerHTML = '<i class="fas fa-pen text-blue-600"></i> Editar Módulo';
             document.getElementById('btn-submit-text').innerHTML = 'Guardar Cambios';
             document.getElementById('btn-cancelar-edicion').classList.remove('hidden');
@@ -421,6 +623,7 @@
         window.cancelarEdicion = () => {
             moduloEditId = null;
             document.getElementById('form-modulo').reset();
+            document.getElementById('tipoTarifa').value = 'paginas';
             document.getElementById('titulo-formulario').innerHTML = '<i class="fas fa-plus text-green-600"></i> Nuevo Módulo';
             document.getElementById('btn-submit-text').innerHTML = 'Agregar a la lista';
             document.getElementById('btn-cancelar-edicion').classList.add('hidden');
@@ -436,7 +639,7 @@
         };
 
         window.eliminarModulo = async (id) => {
-            if (window.confirm('¿Estás seguro de eliminar este módulo? Esta acción no se puede deshacer.')) {
+            if (window.confirm('¿Estás seguro de eliminar este ítem? Esta acción no se puede deshacer.')) {
                 try {
                     await deleteDoc(doc(db, "modulos", id));
                 } catch (error) {
@@ -471,24 +674,36 @@
                 const estadoActual = ESTADOS.find(e => e.id === modulo.estado);
                 const selectClass = estadoActual ? estadoActual.colorClase : '';
 
-                // Enlaces
                 const enlaceOrigenHtml = modulo.enlaceOrigen 
                     ? `<a href="${modulo.enlaceOrigen}" target="_blank" class="flex items-center gap-1 text-sm text-blue-600 hover:underline truncate"><i class="fas fa-link"></i> Origen</a>` 
-                    : `<span class="text-sm text-gray-400 flex items-center gap-1"><i class="fas fa-link"></i> Sin enlace de origen</span>`;
+                    : `<span class="text-sm text-gray-400 flex items-center gap-1"><i class="fas fa-link"></i> Sin origen</span>`;
                 
                 const enlaceDestinoHtml = modulo.enlaceDestino 
-                    ? `<a href="${modulo.enlaceDestino}" target="_blank" class="flex items-center gap-1 text-sm text-green-600 hover:underline truncate"><i class="fas fa-external-link-alt"></i> Cargado en</a>` 
-                    : `<span class="text-sm text-gray-400 flex items-center gap-1"><i class="fas fa-external-link-alt"></i> Sin enlace de destino</span>`;
+                    ? `<a href="${modulo.enlaceDestino}" target="_blank" class="flex items-center gap-1 text-sm text-green-600 hover:underline truncate"><i class="fas fa-external-link-alt"></i> Cargado</a>` 
+                    : `<span class="text-sm text-gray-400 flex items-center gap-1"><i class="fas fa-external-link-alt"></i> Sin destino</span>`;
 
-                // Etiquetas de Modalidades
                 const modalidadesTags = (modulo.modalidades && modulo.modalidades.length > 0)
                     ? modulo.modalidades.map(m => `<span class="bg-gray-100 border border-gray-200 text-gray-600 text-[10px] px-2 py-0.5 rounded uppercase font-semibold">${m}</span>`).join('')
                     : `<span class="text-gray-400 text-xs italic">Sin modalidad</span>`;
 
                 const fechaFormat = formatearFechaLocal(modulo.fechaEntrega);
                 const nombreMostrar = modulo.nombre || 'Sin nombre asignado';
-                const profesorMostrar = modulo.profesor || 'Sin asignar';
                 const ticketMostrar = modulo.ticket || '0000';
+
+                // Determinar qué info de desglose mostrar
+                let infoDesgloseHtml = '';
+                if (modulo.tipoTarifa === 'paginas' || !modulo.tipoTarifa) {
+                    infoDesgloseHtml = `
+                        <div class="flex gap-4 text-sm mt-1">
+                            <div><span class="font-semibold text-gray-700">${modulo.paginasModulo || 0}</span> Mod.</div>
+                            <div><span class="font-semibold text-gray-700">${modulo.paginasPrograma || 0}</span> Prog.</div>
+                            <div class="font-bold text-gray-900 border-l pl-4 border-gray-300">${modulo.totalPaginas || 0} Total</div>
+                        </div>`;
+                } else {
+                    const extra = preciosRef.extras.find(e => e.id === modulo.tipoTarifa);
+                    const nombreExtra = extra ? extra.nombre : 'Categoría Especial';
+                    infoDesgloseHtml = `<div class="text-sm mt-1 text-blue-700 font-semibold flex items-center gap-1"><i class="fas fa-star text-[10px] text-yellow-500"></i> Tarifa Fija: ${nombreExtra}</div>`;
+                }
 
                 html += `
                     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden relative group">
@@ -503,11 +718,11 @@
                                         ${modalidadesTags}
                                     </div>
                                     <h3 class="text-lg font-bold text-gray-800">
-                                        <span class="text-gray-400 font-mono text-sm mr-2" title="Ticket del módulo">#${ticketMostrar}</span>
+                                        <span class="text-gray-400 font-mono text-sm mr-2" title="Ticket">#${ticketMostrar}</span>
                                         ${nombreMostrar}
                                     </h3>
                                     <p class="text-sm text-gray-600 mt-1">
-                                        <i class="fas fa-user text-gray-400 mr-1"></i> Prof: ${profesorMostrar} 
+                                        <i class="fas fa-user text-gray-400 mr-1"></i> Prof: ${modulo.profesor || '-'} 
                                         ${fechaFormat ? `<span class="ml-3"><i class="far fa-calendar-alt text-gray-400 mr-1"></i> Entrega: ${fechaFormat}</span>` : ''}
                                     </p>
                                 </div>
@@ -529,21 +744,15 @@
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 bg-gray-50 rounded-lg p-3 border border-gray-100">
                                 <div>
-                                    <p class="text-xs text-gray-500 mb-1 font-semibold uppercase tracking-wide">Desglose de Páginas</p>
-                                    <div class="flex gap-4 text-sm mt-1">
-                                        <div><span class="font-semibold text-gray-700">${modulo.paginasModulo}</span> Mod.</div>
-                                        <div><span class="font-semibold text-gray-700">${modulo.paginasPrograma}</span> Prog.</div>
-                                        <div class="font-bold text-gray-900 border-l pl-4 border-gray-300">
-                                            ${modulo.totalPaginas} Total
-                                        </div>
-                                    </div>
-                                    <div class="mt-2 text-sm font-bold text-blue-700 bg-blue-50 inline-block px-2 py-1 rounded border border-blue-100">
-                                        Costo: ${formatearMoneda(modulo.costo)}
+                                    <p class="text-xs text-gray-500 mb-1 font-semibold uppercase tracking-wide">Desglose de Trabajo</p>
+                                    ${infoDesgloseHtml}
+                                    <div class="mt-2 text-sm font-bold text-blue-700 bg-blue-50 inline-block px-2 py-1 rounded border border-blue-100 shadow-sm">
+                                        Costo a facturar: ${formatearMoneda(modulo.costo)}
                                     </div>
                                 </div>
 
                                 <div class="space-y-2">
-                                    <p class="text-xs text-gray-500 mb-1 font-semibold uppercase tracking-wide">Enlaces de Trabajo</p>
+                                    <p class="text-xs text-gray-500 mb-1 font-semibold uppercase tracking-wide">Enlaces</p>
                                     ${enlaceOrigenHtml}
                                     ${enlaceDestinoHtml}
                                 </div>
@@ -556,32 +765,38 @@
         };
 
         const actualizarTotal = () => {
-            const total = modulos
-                .filter(m => m.estado === 'realizado')
-                .reduce((acc, m) => acc + m.costo, 0);
-            document.getElementById('total-cobrar').textContent = formatearMoneda(total);
+            const realizados = modulos.filter(m => m.estado === 'realizado');
+            const porHacer = modulos.filter(m => m.estado === 'por_hacer');
+            
+            const totalRealizado = realizados.reduce((acc, m) => acc + m.costo, 0);
+            const totalPorHacer = porHacer.reduce((acc, m) => acc + m.costo, 0);
+
+            document.getElementById('total-cobrar').textContent = formatearMoneda(totalRealizado);
+            document.getElementById('total-por-hacer').textContent = formatearMoneda(totalPorHacer);
         };
 
-        // --- LÓGICA DEL CORREO (RICH TEXT / HTML) ---
+        // --- LÓGICA DEL CORREO (TEXTO LIMPIO SIN DIVS) ---
         window.abrirModalCorreo = () => {
             const realizados = modulos.filter(m => m.estado === 'realizado');
             const totalFacturar = realizados.reduce((acc, m) => acc + m.costo, 0);
 
-            let correoHTML = `<div style="font-family: Arial, Helvetica, sans-serif; color: #333; line-height: 1.5;">`;
-            correoHTML += `<p>Gus y Vicky, buenos días!</p>`;
-            correoHTML += `<p>A continuación adjunto factura y detalle de los módulos maquetados en el último periodo, pongo en copia a Servicios Educativos.</p>`;
+            // Generar HTML sin contenedores globales (<div>) para evitar que al pegar se ponga recuadros en el texto.
+            // Usamos párrafos (<p>) con márgenes por defecto limpios.
+            let correoHTML = `
+                <p style="font-family: Arial, sans-serif; font-size: 14px; margin-bottom: 15px; color: #333;">Gus y Vicky, buenos días!</p>
+                <p style="font-family: Arial, sans-serif; font-size: 14px; margin-bottom: 20px; color: #333;">A continuación adjunto factura y detalle de los trabajos en el último periodo, pongo en copia a Servicios Educativos.</p>
+            `;
             
             if (realizados.length > 0) {
-                correoHTML += `<br>`;
-                correoHTML += `<table style="width: 100%; max-width: 950px; border-collapse: collapse; margin-bottom: 20px; font-family: Arial, sans-serif; font-size: 13px;">
+                correoHTML += `
+                <table style="width: 100%; max-width: 950px; border-collapse: collapse; margin-bottom: 25px; font-family: Arial, sans-serif; font-size: 13px;">
                     <thead>
                         <tr style="background-color: #f3f4f6;">
                             <th style="border: 1px solid #d1d5db; padding: 10px; text-align: left;">Ticket</th>
-                            <th style="border: 1px solid #d1d5db; padding: 10px; text-align: left;">Módulo</th>
+                            <th style="border: 1px solid #d1d5db; padding: 10px; text-align: left;">Módulo / Trabajo</th>
                             <th style="border: 1px solid #d1d5db; padding: 10px; text-align: left;">Carrera</th>
                             <th style="border: 1px solid #d1d5db; padding: 10px; text-align: left;">Modalidad</th>
-                            <th style="border: 1px solid #d1d5db; padding: 10px; text-align: left;">Profesor</th>
-                            <th style="border: 1px solid #d1d5db; padding: 10px; text-align: center;">Pág. Totales</th>
+                            <th style="border: 1px solid #d1d5db; padding: 10px; text-align: center;">Pág. / Ítem</th>
                             <th style="border: 1px solid #d1d5db; padding: 10px; text-align: right;">Costo</th>
                         </tr>
                     </thead>
@@ -591,51 +806,66 @@
                     const carreraNombre = CARRERAS.find(c => c.id === m.carreraId)?.nombre || '-';
                     const modsStr = (m.modalidades && m.modalidades.length > 0) ? m.modalidades.join(', ') : '-';
                     
+                    let paginasMostradas = m.totalPaginas || 0;
+                    if(m.tipoTarifa && m.tipoTarifa !== 'paginas') {
+                         paginasMostradas = '-'; // Si es fijo no mostramos num pág
+                    }
+
                     correoHTML += `<tr>
                         <td style="border: 1px solid #d1d5db; padding: 8px; color: #666;">#${m.ticket || '0000'}</td>
                         <td style="border: 1px solid #d1d5db; padding: 8px;"><b>${m.nombre || 'S/N'}</b></td>
                         <td style="border: 1px solid #d1d5db; padding: 8px;">${carreraNombre}</td>
                         <td style="border: 1px solid #d1d5db; padding: 8px;">${modsStr}</td>
-                        <td style="border: 1px solid #d1d5db; padding: 8px;">${m.profesor || '-'}</td>
-                        <td style="border: 1px solid #d1d5db; padding: 8px; text-align: center;">${m.totalPaginas}</td>
+                        <td style="border: 1px solid #d1d5db; padding: 8px; text-align: center;">${paginasMostradas}</td>
                         <td style="border: 1px solid #d1d5db; padding: 8px; text-align: right; white-space: nowrap;">${formatearMoneda(m.costo)}</td>
                     </tr>`;
                 });
                 
                 correoHTML += `<tr style="background-color: #eff6ff;">
-                    <td colspan="6" style="border: 1px solid #d1d5db; padding: 12px; text-align: right; font-weight: bold; color: #1e3a8a;">TOTAL A FACTURAR:</td>
+                    <td colspan="5" style="border: 1px solid #d1d5db; padding: 12px; text-align: right; font-weight: bold; color: #1e3a8a;">TOTAL A FACTURAR:</td>
                     <td style="border: 1px solid #d1d5db; padding: 12px; text-align: right; font-weight: bold; color: #1e3a8a; white-space: nowrap;">${formatearMoneda(totalFacturar)}</td>
                 </tr></tbody></table>`;
             } else {
-                correoHTML += `<p style="color: #666; font-style: italic;">[No hay módulos marcados como "Realizado" en este periodo]</p>`;
+                correoHTML += `<p style="font-family: Arial, sans-serif; font-size: 14px; margin-bottom: 20px; color: #666; font-style: italic;">[No hay módulos marcados como "Realizado" en este periodo]</p>`;
             }
 
             // Calculamos los precios actualizados para la tabla de referencia final
-            const baseActualizada = (base) => formatearMoneda(base * (1 + porcentajeIncremento/100));
+            const calcAct = (base) => formatearMoneda(base * (1 + preciosRef.incremento/100));
 
-            correoHTML += `<br>`;
-            correoHTML += `<p style="font-weight: bold; margin-bottom: 8px; font-size: 13px;">--- REFERENCIA DE VALORES ---</p>`;
-            correoHTML += `<table style="width: 350px; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 12px;">
-                <tbody>
+            correoHTML += `
+                <p style="font-family: Arial, sans-serif; font-weight: bold; margin-bottom: 10px; font-size: 14px; color: #333;">--- REFERENCIA DE VALORES ---</p>
+                <table style="width: 380px; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 12px; margin-bottom: 20px;">
+                    <tbody>`;
+            
+            // Reconstruir la tabla de ref usando los datos reales
+            let rangos = [...preciosRef.porPaginas].sort((a,b) => a.limite - b.limite);
+            let limitAnterior = 0;
+            rangos.forEach((r, idx) => {
+                let label = '';
+                if (idx === 0) label = `Hasta ${r.limite} páginas`;
+                else if (r.limite >= 9999) label = `Más de ${limitAnterior} páginas`;
+                else label = `${limitAnterior + 1} a ${r.limite} páginas`;
+                limitAnterior = r.limite;
+
+                correoHTML += `
+                <tr>
+                    <td style="border: 1px solid #e5e7eb; padding: 6px 10px; background-color: #f9fafb;">${label}</td>
+                    <td style="border: 1px solid #e5e7eb; padding: 6px 10px; text-align: right; font-weight: 500;">${calcAct(r.precioBase)}</td>
+                </tr>`;
+            });
+
+            if(preciosRef.extras.length > 0) {
+                 correoHTML += `<tr><td colspan="2" style="border: 1px solid #e5e7eb; padding: 6px 10px; background-color: #f3f4f6; font-weight: bold; text-align: center;">Categorías Adicionales</td></tr>`;
+                 preciosRef.extras.forEach(e => {
+                     correoHTML += `
                     <tr>
-                        <td style="border: 1px solid #e5e7eb; padding: 6px 10px; background-color: #f9fafb;">Hasta 80 páginas</td>
-                        <td style="border: 1px solid #e5e7eb; padding: 6px 10px; text-align: right; font-weight: 500;">${baseActualizada(42000)}</td>
-                    </tr>
-                    <tr>
-                        <td style="border: 1px solid #e5e7eb; padding: 6px 10px; background-color: #f9fafb;">81 a 120 páginas</td>
-                        <td style="border: 1px solid #e5e7eb; padding: 6px 10px; text-align: right; font-weight: 500;">${baseActualizada(52500)}</td>
-                    </tr>
-                    <tr>
-                        <td style="border: 1px solid #e5e7eb; padding: 6px 10px; background-color: #f9fafb;">121 a 140 páginas</td>
-                        <td style="border: 1px solid #e5e7eb; padding: 6px 10px; text-align: right; font-weight: 500;">${baseActualizada(63000)}</td>
-                    </tr>
-                    <tr>
-                        <td style="border: 1px solid #e5e7eb; padding: 6px 10px; background-color: #f9fafb;">Más de 141 páginas</td>
-                        <td style="border: 1px solid #e5e7eb; padding: 6px 10px; text-align: right; font-weight: 500;">${baseActualizada(73500)}</td>
-                    </tr>
-                </tbody>
-            </table>`;
-            correoHTML += `</div>`;
+                        <td style="border: 1px solid #e5e7eb; padding: 6px 10px; background-color: #f9fafb;">${e.nombre}</td>
+                        <td style="border: 1px solid #e5e7eb; padding: 6px 10px; text-align: right; font-weight: 500;">${calcAct(e.precioBase)}</td>
+                    </tr>`;
+                 });
+            }
+
+            correoHTML += `</tbody></table>`;
 
             document.getElementById('texto-correo').innerHTML = correoHTML;
             document.getElementById('modal-correo').classList.remove('hidden');

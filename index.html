@@ -8,6 +8,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome para los íconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Librerías para PDF y Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    
     <style>
         /* Estilos base personalizados */
         body { font-family: system-ui, -apple-system, sans-serif; }
@@ -25,7 +29,7 @@
     <div class="max-w-7xl mx-auto space-y-6">
         
         <!-- ENCABEZADO Y RESUMEN -->
-        <div class="bg-white rounded-xl shadow-sm p-6 flex flex-col lg:flex-row justify-between items-center border border-gray-100 gap-4">
+        <div class="bg-white rounded-xl shadow-sm p-6 flex flex-col xl:flex-row justify-between items-center border border-gray-100 gap-4">
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
                     <i class="fas fa-book-open text-blue-600"></i>
@@ -34,23 +38,30 @@
                 <p class="text-gray-500 text-sm mt-1">Control de módulos, páginas y facturación</p>
             </div>
             
-            <div class="flex flex-wrap items-center justify-center gap-4">
+            <div class="flex flex-wrap items-center justify-center gap-3">
                 <!-- Calculador Por Hacer -->
-                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-center min-w-[140px] shadow-sm">
-                    <span class="block text-xs font-semibold text-yellow-700 uppercase tracking-wider">Calculador: Por Hacer</span>
-                    <span id="total-por-hacer" class="block text-xl font-bold text-yellow-700">$ 0</span>
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-2 text-center min-w-[130px] shadow-sm">
+                    <span class="block text-[10px] font-semibold text-yellow-700 uppercase tracking-wider">Calc: Por Hacer</span>
+                    <span id="total-por-hacer" class="block text-lg font-bold text-yellow-700">$ 0</span>
                 </div>
 
                 <!-- Calculador A Cobrar -->
-                <div class="bg-green-50 border border-green-200 rounded-lg p-3 text-center min-w-[140px] shadow-sm">
-                    <span class="block text-xs font-semibold text-green-700 uppercase tracking-wider">A Cobrar (Realizados)</span>
-                    <span id="total-cobrar" class="block text-2xl font-bold text-green-700">$ 0</span>
+                <div class="bg-green-50 border border-green-200 rounded-lg p-2 text-center min-w-[130px] shadow-sm">
+                    <span class="block text-[10px] font-semibold text-green-700 uppercase tracking-wider">A Cobrar (Realizados)</span>
+                    <span id="total-cobrar" class="block text-xl font-bold text-green-700">$ 0</span>
                 </div>
                 
-                <button onclick="abrirModalCorreo()" class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg font-medium transition-colors shadow-sm">
-                    <i class="fas fa-envelope"></i>
-                    Redactar Correo
-                </button>
+                <div class="flex flex-col sm:flex-row gap-2 ml-2">
+                    <button onclick="exportarExcel()" class="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm" title="Exportar Reporte Excel">
+                        <i class="fas fa-file-excel"></i> Excel
+                    </button>
+                    <button onclick="exportarPDF()" class="flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm" title="Descargar Tarifas en PDF">
+                        <i class="fas fa-file-pdf"></i> Tarifas
+                    </button>
+                    <button onclick="abrirModalCorreo()" class="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm">
+                        <i class="fas fa-envelope"></i> Redactar Correo
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -108,6 +119,13 @@
                                 </select>
                             </div>
 
+                            <!-- Costo Manual (Oculto por defecto) -->
+                            <div id="contenedor-costo-manual" class="hidden bg-purple-50 p-3 rounded-lg border border-purple-200">
+                                <label class="block text-xs font-bold text-purple-700 mb-1">Costo Manual a Facturar ($)</label>
+                                <input type="number" min="0" id="costoManual" placeholder="Ej: 45000" class="w-full text-sm rounded-md border-purple-300 border p-2 focus:ring-purple-500 focus:border-purple-500 bg-white">
+                                <p class="text-[10px] text-purple-600 mt-1">Este valor será el final, no se le aplicarán aumentos automáticos.</p>
+                            </div>
+
                             <!-- Modalidad (Múltiple) -->
                             <div>
                                 <label class="block text-xs font-medium text-gray-700 mb-1">Modalidad</label>
@@ -157,7 +175,7 @@
                             <div class="space-y-2 pt-2 border-t">
                                 <div>
                                     <label class="block text-xs font-medium text-gray-700 mb-1 flex items-center gap-1">
-                                        <i class="fas fa-link text-xs"></i> Material de Origen (URL)
+                                        <i class="fas fa-link text-xs"></i> Archivos Originales (URL)
                                     </label>
                                     <input type="url" id="enlaceOrigen" placeholder="https://drive.google.com/..." class="w-full text-sm rounded-md border-gray-300 border p-2 text-gray-600">
                                 </div>
@@ -211,7 +229,7 @@
                         <input type="number" id="config-incremento" min="0" class="w-full rounded border-blue-300 p-2 text-right">
                         <span class="font-bold text-blue-800">%</span>
                     </div>
-                    <p class="text-xs text-blue-700 mt-2">Este porcentaje se suma automáticamente a los valores base configurados abajo.</p>
+                    <p class="text-xs text-blue-700 mt-2">Este porcentaje se suma automáticamente a los valores base configurados abajo. El correo también avisará sobre la adecuación.</p>
                 </div>
 
                 <!-- Categorías por Páginas -->
@@ -235,7 +253,7 @@
                     <div id="lista-config-extras" class="space-y-2">
                         <!-- Llenado por JS -->
                     </div>
-                    <p class="text-[10px] text-gray-500 mt-2">Útil para cobrar tareas fijas (diseño, revisión, etc.) independientemente del número de páginas.</p>
+                    <p class="text-[10px] text-gray-500 mt-2">Útil para cobrar tareas fijas (diseño, revisión, etc.). La opción "A definir según contenido" ya viene incluida por defecto.</p>
                 </div>
             </div>
             
@@ -302,7 +320,7 @@
 
         // --- CONSTANTES ---
         const CARRERAS = [
-            { id: 'rh', nombre: 'Recursos Humanos', color: '#B58BC2' },
+            { id: 'rh', nombre: 'Recursos Humanos', color: '#B58BC2' }, // Restaurado al lila original de la imagen
             { id: 'as', nombre: 'Analista de Sistemas', color: '#00AEEF' },
             { id: 'hsl', nombre: 'Higiene y Seguridad Laboral', color: '#F9C51D' },
             { id: 'ae', nombre: 'Administración de Empresas', color: '#87A241' },
@@ -345,19 +363,21 @@
             if (!fechaISO) return '';
             const [y, m, d] = fechaISO.split('-');
             return `${d}/${m}/${y}`;
-        }
+        };
 
-        const calcularCostoActivo = (tipoTarifa, totalPaginas) => {
+        const calcularCostoActivo = (tipoTarifa, totalPaginas, costoManual) => {
             let costoBase = 0;
+            
+            if (tipoTarifa === 'manual') {
+                return parseFloat(costoManual) || 0; // Al manual no se le suma el incremento automático
+            }
             
             if (tipoTarifa === 'paginas') {
                 if (totalPaginas <= 0) return 0;
-                // Ordenar rangos de menor a mayor
                 const rangos = [...preciosRef.porPaginas].sort((a,b) => a.limite - b.limite);
                 const rangoEncontrado = rangos.find(r => totalPaginas <= r.limite);
                 costoBase = rangoEncontrado ? rangoEncontrado.precioBase : rangos[rangos.length - 1].precioBase;
             } else {
-                // Es un extra
                 const extra = preciosRef.extras.find(e => e.id === tipoTarifa);
                 costoBase = extra ? extra.precioBase : 0;
             }
@@ -375,10 +395,22 @@
                 selectCarrera.appendChild(option);
             });
 
+            // Manejo de la selección del tipo de tarifa
+            document.getElementById('tipoTarifa').addEventListener('change', (e) => {
+                const contManual = document.getElementById('contenedor-costo-manual');
+                const pnlPaginas1 = document.getElementById('paginasModulo').parentElement;
+                const pnlPaginas2 = document.getElementById('paginasPrograma').parentElement;
+
+                if (e.target.value === 'manual') {
+                    contManual.classList.remove('hidden');
+                } else {
+                    contManual.classList.add('hidden');
+                }
+            });
+
             actualizarUICfgPrecios();
         });
 
-        // Actualiza tabla lateral y selects
         const actualizarUICfgPrecios = () => {
             document.getElementById('display-incremento-sidebar').textContent = `${preciosRef.incremento}%`;
             
@@ -386,6 +418,9 @@
             const selectTarifa = document.getElementById('tipoTarifa');
             selectTarifa.innerHTML = `<option value="paginas" class="font-bold text-gray-800">📊 Automático por Páginas</option>`;
             
+            // Opción para definir precio a mano
+            selectTarifa.innerHTML += `<option value="manual" class="font-bold text-purple-700">✍️ A definir según contenido</option>`;
+
             if(preciosRef.extras.length > 0) {
                 const group = document.createElement('optgroup');
                 group.label = "Categorías Fijas (Sin Pág)";
@@ -549,6 +584,7 @@
             const pagProg = parseInt(document.getElementById('paginasPrograma').value) || 0;
             const totalPaginas = pagMod + pagProg;
             const tipoTarifa = document.getElementById('tipoTarifa').value;
+            const costoManual = document.getElementById('costoManual').value;
 
             const modalidadesCheckboxes = document.querySelectorAll('input[name="modalidad"]:checked');
             const modalidades = Array.from(modalidadesCheckboxes).map(cb => cb.value);
@@ -563,7 +599,8 @@
                 paginasModulo: pagMod,
                 paginasPrograma: pagProg,
                 totalPaginas: totalPaginas,
-                costo: calcularCostoActivo(tipoTarifa, totalPaginas), 
+                costoManualGuardado: tipoTarifa === 'manual' ? costoManual : 0,
+                costo: calcularCostoActivo(tipoTarifa, totalPaginas, costoManual), 
                 enlaceOrigen: document.getElementById('enlaceOrigen').value || '',
                 enlaceDestino: document.getElementById('enlaceDestino').value || ''
             };
@@ -582,6 +619,7 @@
                     e.target.reset();
                     document.getElementById('carreraId').value = CARRERAS[0].id;
                     document.getElementById('tipoTarifa').value = 'paginas';
+                    document.getElementById('contenedor-costo-manual').classList.add('hidden');
                 }
             } catch (error) {
                 console.error("Error al guardar documento: ", error);
@@ -600,6 +638,14 @@
             moduloEditId = id;
             document.getElementById('carreraId').value = modulo.carreraId || CARRERAS[0].id;
             document.getElementById('tipoTarifa').value = modulo.tipoTarifa || 'paginas';
+            
+            if (modulo.tipoTarifa === 'manual') {
+                document.getElementById('contenedor-costo-manual').classList.remove('hidden');
+                document.getElementById('costoManual').value = modulo.costoManualGuardado || modulo.costo;
+            } else {
+                document.getElementById('contenedor-costo-manual').classList.add('hidden');
+                document.getElementById('costoManual').value = '';
+            }
             
             document.querySelectorAll('input[name="modalidad"]').forEach(cb => {
                 cb.checked = modulo.modalidades ? modulo.modalidades.includes(cb.value) : false;
@@ -624,6 +670,7 @@
             moduloEditId = null;
             document.getElementById('form-modulo').reset();
             document.getElementById('tipoTarifa').value = 'paginas';
+            document.getElementById('contenedor-costo-manual').classList.add('hidden');
             document.getElementById('titulo-formulario').innerHTML = '<i class="fas fa-plus text-green-600"></i> Nuevo Módulo';
             document.getElementById('btn-submit-text').innerHTML = 'Agregar a la lista';
             document.getElementById('btn-cancelar-edicion').classList.add('hidden');
@@ -665,7 +712,7 @@
             let html = '';
             modulos.forEach(modulo => {
                 const carrera = CARRERAS.find(c => c.id === modulo.carreraId);
-                const colorFondo = carrera ? carrera.color : '#eee';
+                const colorFondo = carrera ? carrera.color : '#1E293B';
                 
                 const selectOptions = ESTADOS.map(est => 
                     `<option value="${est.id}" ${est.id === modulo.estado ? 'selected' : ''}>${est.nombre}</option>`
@@ -674,12 +721,13 @@
                 const estadoActual = ESTADOS.find(e => e.id === modulo.estado);
                 const selectClass = estadoActual ? estadoActual.colorClase : '';
 
+                // Textos de enlaces modificados a pedido
                 const enlaceOrigenHtml = modulo.enlaceOrigen 
-                    ? `<a href="${modulo.enlaceOrigen}" target="_blank" class="flex items-center gap-1 text-sm text-blue-600 hover:underline truncate"><i class="fas fa-link"></i> Origen</a>` 
+                    ? `<a href="${modulo.enlaceOrigen}" target="_blank" class="flex items-center gap-1 text-sm text-blue-600 hover:underline truncate"><i class="fas fa-link"></i> Ver archivos originales</a>` 
                     : `<span class="text-sm text-gray-400 flex items-center gap-1"><i class="fas fa-link"></i> Sin origen</span>`;
                 
                 const enlaceDestinoHtml = modulo.enlaceDestino 
-                    ? `<a href="${modulo.enlaceDestino}" target="_blank" class="flex items-center gap-1 text-sm text-green-600 hover:underline truncate"><i class="fas fa-external-link-alt"></i> Cargado</a>` 
+                    ? `<a href="${modulo.enlaceDestino}" target="_blank" class="flex items-center gap-1 text-sm text-green-600 hover:underline truncate"><i class="fas fa-external-link-alt"></i> Ver material cargado</a>` 
                     : `<span class="text-sm text-gray-400 flex items-center gap-1"><i class="fas fa-external-link-alt"></i> Sin destino</span>`;
 
                 const modalidadesTags = (modulo.modalidades && modulo.modalidades.length > 0)
@@ -687,10 +735,10 @@
                     : `<span class="text-gray-400 text-xs italic">Sin modalidad</span>`;
 
                 const fechaFormat = formatearFechaLocal(modulo.fechaEntrega);
-                const nombreMostrar = modulo.nombre || 'Sin nombre asignado';
+                const nombreMostrar = modulo.nombre || 'SIN NOMBRE ASIGNADO';
                 const ticketMostrar = modulo.ticket || '0000';
 
-                // Determinar qué info de desglose mostrar
+                // Determinar info de desglose
                 let infoDesgloseHtml = '';
                 if (modulo.tipoTarifa === 'paginas' || !modulo.tipoTarifa) {
                     infoDesgloseHtml = `
@@ -699,26 +747,56 @@
                             <div><span class="font-semibold text-gray-700">${modulo.paginasPrograma || 0}</span> Prog.</div>
                             <div class="font-bold text-gray-900 border-l pl-4 border-gray-300">${modulo.totalPaginas || 0} Total</div>
                         </div>`;
+                } else if (modulo.tipoTarifa === 'manual') {
+                    infoDesgloseHtml = `<div class="text-sm mt-1 text-purple-700 font-semibold flex items-center gap-1"><i class="fas fa-hand-holding-usd text-[10px]"></i> Tarifa Manual (A definir)</div>`;
                 } else {
                     const extra = preciosRef.extras.find(e => e.id === modulo.tipoTarifa);
                     const nombreExtra = extra ? extra.nombre : 'Categoría Especial';
                     infoDesgloseHtml = `<div class="text-sm mt-1 text-blue-700 font-semibold flex items-center gap-1"><i class="fas fa-star text-[10px] text-yellow-500"></i> Tarifa Fija: ${nombreExtra}</div>`;
                 }
 
+                // ESTRUCTURA CON MINIATURA INCORPORADA Y TAMAÑO REDUCIDO
                 html += `
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden relative group">
-                        <div class="absolute inset-y-0 left-0 w-full opacity-[0.08] pointer-events-none" style="background: linear-gradient(90deg, ${colorFondo} 0%, transparent 60%)"></div>
-                        <div class="absolute inset-y-0 left-0 w-1.5" style="background-color: ${colorFondo}"></div>
+                    <div class="bg-white rounded-xl shadow-sm overflow-hidden flex flex-col md:flex-row gap-0 hover:shadow-md transition-shadow relative" style="border: 1px solid #f3f4f6; border-left: 4px solid ${colorFondo};">
+                        
+                        <!-- MINIATURA ESTILO PORTADA -->
+                        <div class="w-full md:w-48 bg-white border-b border-gray-100 md:border-b-0 md:border-r relative overflow-hidden flex flex-col justify-between shrink-0" style="min-height: 140px;">
+                            <!-- Patrón decorativo (círculo rayado) a la izquierda -->
+                            <div class="absolute left-[-22px] top-[30px] w-14 h-24 rounded-r-full opacity-80" style="color: ${colorFondo}; background: repeating-linear-gradient(-45deg, transparent, transparent 3px, currentColor 3px, currentColor 6px);"></div>
+                            
+                            <!-- Espacio superior libre para no estar "en la cima" -->
+                            <div class="pt-2"></div>
 
-                        <div class="p-5 pl-6 relative z-10">
+                            <!-- Centro: Carrera y Materia -->
+                            <div class="flex-1 flex flex-col items-center justify-center p-2 pl-4 pr-2 z-10 text-center gap-1.5">
+                                <!-- Etiqueta superior con corte (Carrera) centrada arriba de la materia -->
+                                <div class="text-white font-bold text-center py-1 px-3 z-10 text-[7px] uppercase shadow-sm inline-block" style="background-color: ${colorFondo}; clip-path: polygon(8px 0, 100% 0, 100% 100%, 0 100%);">
+                                    TECNICATURA SUPERIOR EN<br/>
+                                    <span class="text-[8px]">${carrera?.nombre || 'CARRERA'}</span>
+                                </div>
+
+                                <div class="font-extrabold text-[13px] uppercase tracking-wide leading-tight" style="color: ${colorFondo};">
+                                    ${nombreMostrar}
+                                </div>
+                            </div>
+
+                            <!-- Footer: Elaborado por -->
+                            <div class="text-white z-10 p-1.5 px-3 text-left flex flex-col justify-center mb-3 mx-auto shadow-sm w-[85%]" style="background-color: ${colorFondo};">
+                                <span class="text-[7px] opacity-90">Material elaborado por</span>
+                                <span class="font-bold text-[9px] leading-tight">${modulo.profesor || 'Docente'}</span>
+                            </div>
+                        </div>
+
+                        <!-- DETALLES Y ACCIONES (Derecha - Más compactos) -->
+                        <div class="flex-1 p-4 relative">
                             <div class="flex justify-between items-start mb-2">
                                 <div>
-                                    <div class="flex flex-wrap items-center gap-2 mb-2">
-                                        <span class="text-xs font-bold px-2 py-1 rounded-full text-white inline-block shadow-sm" style="background-color: ${colorFondo}">${carrera?.nombre || 'Desconocida'}</span>
+                                    <div class="flex flex-wrap items-center gap-2 mb-1.5">
+                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full text-white inline-block shadow-sm" style="background-color: ${colorFondo}">${carrera?.nombre || 'Desconocida'}</span>
                                         ${modalidadesTags}
                                     </div>
-                                    <h3 class="text-lg font-bold text-gray-800">
-                                        <span class="text-gray-400 font-mono text-sm mr-2" title="Ticket">#${ticketMostrar}</span>
+                                    <h3 class="text-base font-bold text-gray-800 leading-tight">
+                                        <span class="text-gray-400 font-mono text-xs mr-1" title="Ticket">#${ticketMostrar}</span>
                                         ${nombreMostrar}
                                     </h3>
                                     <p class="text-sm text-gray-600 mt-1">
@@ -727,37 +805,32 @@
                                     </p>
                                 </div>
                                 
-                                <div class="flex items-center gap-2">
-                                    <select onchange="cambiarEstado('${modulo.id}', this.value)" class="text-sm rounded-full border px-3 py-1 font-medium focus:outline-none cursor-pointer text-center shadow-sm ${selectClass}" style="appearance: none; padding-right: 1rem;">
+                                <div class="flex items-center gap-1 md:gap-2">
+                                    <select onchange="cambiarEstado('${modulo.id}', this.value)" class="text-xs md:text-sm rounded-full border px-2 md:px-3 py-1 font-medium focus:outline-none cursor-pointer text-center shadow-sm ${selectClass}" style="appearance: none; padding-right: 1rem;">
                                         ${selectOptions}
                                     </select>
-                                    
-                                    <button onclick="editarModulo('${modulo.id}')" class="text-blue-500 hover:text-blue-700 p-2 transition-colors rounded-full hover:bg-blue-50" title="Editar módulo">
-                                        <i class="fas fa-pen"></i>
-                                    </button>
-
-                                    <button onclick="eliminarModulo('${modulo.id}')" class="text-gray-400 hover:text-red-500 p-2 transition-colors rounded-full hover:bg-red-50" title="Eliminar módulo">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
+                                    <button onclick="editarModulo('${modulo.id}')" class="text-blue-500 hover:text-blue-700 p-1.5 transition-colors rounded-full hover:bg-blue-50" title="Editar módulo"><i class="fas fa-pen"></i></button>
+                                    <button onclick="eliminarModulo('${modulo.id}')" class="text-gray-400 hover:text-red-500 p-1.5 transition-colors rounded-full hover:bg-red-50" title="Eliminar módulo"><i class="fas fa-trash-alt"></i></button>
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 bg-gray-50 rounded-lg p-3 border border-gray-100">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3 bg-gray-50 rounded-lg p-2.5 border border-gray-100">
                                 <div>
-                                    <p class="text-xs text-gray-500 mb-1 font-semibold uppercase tracking-wide">Desglose de Trabajo</p>
+                                    <p class="text-[10px] text-gray-500 mb-0.5 font-semibold uppercase tracking-wide">Desglose de Trabajo</p>
                                     ${infoDesgloseHtml}
-                                    <div class="mt-2 text-sm font-bold text-blue-700 bg-blue-50 inline-block px-2 py-1 rounded border border-blue-100 shadow-sm">
+                                    <div class="mt-1.5 text-xs font-bold text-blue-700 bg-blue-50 inline-block px-2 py-1 rounded border border-blue-100 shadow-sm">
                                         Costo a facturar: ${formatearMoneda(modulo.costo)}
                                     </div>
                                 </div>
 
-                                <div class="space-y-2">
-                                    <p class="text-xs text-gray-500 mb-1 font-semibold uppercase tracking-wide">Enlaces</p>
+                                <div class="space-y-1.5">
+                                    <p class="text-[10px] text-gray-500 mb-0.5 font-semibold uppercase tracking-wide">Enlaces de Trabajo</p>
                                     ${enlaceOrigenHtml}
                                     ${enlaceDestinoHtml}
                                 </div>
                             </div>
                         </div>
+
                     </div>
                 `;
             });
@@ -775,13 +848,146 @@
             document.getElementById('total-por-hacer').textContent = formatearMoneda(totalPorHacer);
         };
 
+        // --- EXPORTAR EXCEL ---
+        window.exportarExcel = () => {
+            if(modulos.length === 0) return alert("No hay módulos para exportar.");
+            
+            const data = modulos.map(m => {
+                const carrera = CARRERAS.find(c => c.id === m.carreraId);
+                const estado = ESTADOS.find(e => e.id === m.estado);
+                
+                let tipoServicio = 'Por Páginas';
+                if(m.tipoTarifa === 'manual') tipoServicio = 'A Definir / Manual';
+                else if (m.tipoTarifa && m.tipoTarifa !== 'paginas') {
+                    const extra = preciosRef.extras.find(e => e.id === m.tipoTarifa);
+                    tipoServicio = extra ? extra.nombre : 'Categoría Especial';
+                }
+
+                return {
+                    'Ticket': m.ticket || '',
+                    'Estado': estado ? estado.nombre : '',
+                    'Módulo / Ítem': m.nombre || '',
+                    'Carrera': carrera ? carrera.nombre : '',
+                    'Modalidad': m.modalidades ? m.modalidades.join(', ') : '',
+                    'Profesor': m.profesor || '',
+                    'Fecha Entrega': m.fechaEntrega || '',
+                    'Tipo de Servicio': tipoServicio,
+                    'Págs Módulo': m.paginasModulo || 0,
+                    'Págs Programa': m.paginasPrograma || 0,
+                    'Total Págs': m.totalPaginas || 0,
+                    'Costo': m.costo || 0
+                };
+            });
+
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Reporte Módulos");
+            XLSX.writeFile(wb, "Reporte_Maquetacion.xlsx");
+        };
+
+        // --- EXPORTAR PDF (TARIFARIO) ---
+        window.exportarPDF = () => {
+            const calcAct = (base) => formatearMoneda(base * (1 + preciosRef.incremento/100));
+            
+            // Construir el HTML que se transformará a PDF
+            const divPDF = document.createElement('div');
+            
+            let tablaPaginas = '';
+            let rangos = [...preciosRef.porPaginas].sort((a,b) => a.limite - b.limite);
+            let limitAnterior = 0;
+            rangos.forEach((r, idx) => {
+                let label = '';
+                if (idx === 0) label = `Hasta ${r.limite} páginas`;
+                else if (r.limite >= 9999) label = `Más de ${limitAnterior} páginas`;
+                else label = `${limitAnterior + 1} a ${r.limite} páginas`;
+                limitAnterior = r.limite;
+
+                tablaPaginas += `
+                <tr style="border-bottom: 1px solid #e5e7eb;">
+                    <td style="padding: 12px; font-size: 14px; color: #374151;">${label}</td>
+                    <td style="padding: 12px; font-size: 14px; text-align: right; font-weight: bold; color: #111827;">${calcAct(r.precioBase)}</td>
+                </tr>`;
+            });
+
+            let tablaExtras = '';
+            if(preciosRef.extras.length > 0) {
+                 tablaExtras += `<tr style="background-color: #f3f4f6;"><td colspan="2" style="padding: 10px 12px; font-size: 13px; font-weight: bold; color: #4b5563; text-transform: uppercase;">Servicios Especiales Fijos</td></tr>`;
+                 preciosRef.extras.forEach(e => {
+                     tablaExtras += `
+                    <tr style="border-bottom: 1px solid #e5e7eb;">
+                        <td style="padding: 12px; font-size: 14px; color: #374151;">${e.nombre}</td>
+                        <td style="padding: 12px; font-size: 14px; text-align: right; font-weight: bold; color: #111827;">${calcAct(e.precioBase)}</td>
+                    </tr>`;
+                 });
+            }
+            // Agregamos el "A definir" al final de la tabla
+            tablaExtras += `
+                <tr style="border-bottom: 1px solid #e5e7eb;">
+                    <td style="padding: 12px; font-size: 14px; color: #374151;">A definir según complejidad del contenido</td>
+                    <td style="padding: 12px; font-size: 14px; text-align: right; font-style: italic; color: #6b7280;">A cotizar</td>
+                </tr>`;
+
+            divPDF.innerHTML = `
+                <div style="padding: 40px 50px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #1f2937;">
+                    
+                    <div style="border-bottom: 3px solid #2563eb; padding-bottom: 20px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: flex-end;">
+                        <div>
+                            <h1 style="color: #1e3a8a; font-size: 28px; margin: 0;">Servicios de Maquetación</h1>
+                            <h2 style="color: #6b7280; font-size: 16px; margin: 5px 0 0 0; font-weight: normal;">Edición y Diseño de Módulos Educativos</h2>
+                        </div>
+                        <div style="color: #9ca3af; font-size: 12px; text-align: right;">
+                            Tarifario actualizado<br/>${new Date().toLocaleDateString('es-AR')}
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 40px; line-height: 1.6; font-size: 15px; color: #4b5563;">
+                        <p style="margin-bottom: 15px;">
+                            Ofrezco un servicio integral profesional enfocado en la estructuración visual y pedagógica de materiales de estudio. Mi trabajo garantiza que cada módulo cumpla con los estándares institucionales, mejorando la legibilidad, organizando el contenido clave y aplicando la identidad visual (colores y tipografías) correspondiente a cada carrera.
+                        </p>
+                        <p>
+                            Las tarifas se calculan principalmente en base al volumen del material original (sumando páginas de módulo y programa) o mediante presupuestos a medida para trabajos especiales.
+                        </p>
+                    </div>
+
+                    <h3 style="color: #1e3a8a; font-size: 18px; margin-bottom: 15px; border-left: 4px solid #3b82f6; padding-left: 10px;">Cuadro de Tarifas de Referencia</h3>
+                    
+                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
+                        <thead>
+                            <tr style="background-color: #f9fafb; border-bottom: 2px solid #e5e7eb;">
+                                <th style="padding: 12px; text-align: left; font-size: 14px; color: #374151;">Clasificación de Volumen</th>
+                                <th style="padding: 12px; text-align: right; font-size: 14px; color: #374151;">Valor Final</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${tablaPaginas}
+                            ${tablaExtras}
+                        </tbody>
+                    </table>
+
+                    <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; font-size: 13px; color: #64748b;">
+                        <b>Nota importante:</b> Los valores expresados en esta tabla son referencias estándar actualizadas. El costo final aplicable en cada factura corresponde al monto acordado al momento de recibir el encargo.
+                    </div>
+
+                </div>
+            `;
+
+            const opt = {
+                margin:       0,
+                filename:     'Tarifario_Maquetacion.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+            };
+
+            // Notificamos UI (Podría ser un botón cargando, pero es rápido)
+            html2pdf().set(opt).from(divPDF).save();
+        };
+
         // --- LÓGICA DEL CORREO (TEXTO LIMPIO SIN DIVS) ---
         window.abrirModalCorreo = () => {
             const realizados = modulos.filter(m => m.estado === 'realizado');
             const totalFacturar = realizados.reduce((acc, m) => acc + m.costo, 0);
 
-            // Generar HTML sin contenedores globales (<div>) para evitar que al pegar se ponga recuadros en el texto.
-            // Usamos párrafos (<p>) con márgenes por defecto limpios.
             let correoHTML = `
                 <p style="font-family: Arial, sans-serif; font-size: 14px; margin-bottom: 15px; color: #333;">Gus y Vicky, buenos días!</p>
                 <p style="font-family: Arial, sans-serif; font-size: 14px; margin-bottom: 20px; color: #333;">A continuación adjunto factura y detalle de los trabajos en el último periodo, pongo en copia a Servicios Educativos.</p>
@@ -808,7 +1014,7 @@
                     
                     let paginasMostradas = m.totalPaginas || 0;
                     if(m.tipoTarifa && m.tipoTarifa !== 'paginas') {
-                         paginasMostradas = '-'; // Si es fijo no mostramos num pág
+                         paginasMostradas = '-'; 
                     }
 
                     correoHTML += `<tr>
@@ -832,8 +1038,17 @@
             // Calculamos los precios actualizados para la tabla de referencia final
             const calcAct = (base) => formatearMoneda(base * (1 + preciosRef.incremento/100));
 
+            // AVISO DE ADECUACIÓN DE PRECIOS
+            if (preciosRef.incremento > 0) {
+                correoHTML += `
+                <p style="font-family: Arial, sans-serif; font-size: 13px; color: #b91c1c; font-weight: bold; margin-bottom: 15px; padding: 10px; background-color: #fef2f2; border-left: 4px solid #b91c1c;">
+                    Les informo que se ha llevado a cabo una adecuación en los precios del ${preciosRef.incremento}%. A continuación, les comparto los nuevos valores actualizados de referencia:
+                </p>`;
+            } else {
+                correoHTML += `<p style="font-family: Arial, sans-serif; font-weight: bold; margin-bottom: 10px; font-size: 14px; color: #333;">--- REFERENCIA DE VALORES ---</p>`;
+            }
+
             correoHTML += `
-                <p style="font-family: Arial, sans-serif; font-weight: bold; margin-bottom: 10px; font-size: 14px; color: #333;">--- REFERENCIA DE VALORES ---</p>
                 <table style="width: 380px; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 12px; margin-bottom: 20px;">
                     <tbody>`;
             

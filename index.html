@@ -30,15 +30,24 @@
         
         <!-- ENCABEZADO Y RESUMEN -->
         <div class="bg-white rounded-xl shadow-sm p-6 flex flex-col xl:flex-row justify-between items-center border border-gray-100 gap-4">
-            <div>
-                <h1 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                    <i class="fas fa-book-open text-blue-600"></i>
-                    Gestor de Maquetación
-                </h1>
-                <p class="text-gray-500 text-sm mt-1">Control de módulos, páginas y facturación</p>
+            
+            <div class="flex items-start justify-between w-full xl:w-auto">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                        <i class="fas fa-book-open text-blue-600"></i>
+                        Gestor de Maquetación
+                    </h1>
+                    <p class="text-gray-500 text-sm mt-1">Control de módulos, páginas y estados</p>
+                </div>
+                
+                <!-- Botón de Acceso Admin -->
+                <button id="btn-admin-login" onclick="toggleAdmin()" class="xl:ml-6 mt-1 p-2 rounded-lg hover:bg-gray-100 transition-colors flex items-center gap-2 border border-transparent hover:border-gray-200" title="Acceso Admin">
+                    <i class="fas fa-lock text-gray-400"></i> <span class="text-sm text-gray-500 hidden sm:inline">Acceso</span>
+                </button>
             </div>
             
-            <div class="flex flex-wrap items-center justify-center gap-3">
+            <!-- Acciones Financieras y Calculadoras (SOLO ADMIN) -->
+            <div class="admin-only hidden flex flex-wrap items-center justify-center gap-3 w-full xl:w-auto mt-4 xl:mt-0 pt-4 xl:pt-0 border-t xl:border-none border-gray-100">
                 <!-- Calculador Por Hacer -->
                 <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-2 text-center min-w-[130px] shadow-sm">
                     <span class="block text-[10px] font-semibold text-yellow-700 uppercase tracking-wider">Calc: Por Hacer</span>
@@ -71,8 +80,8 @@
             <div class="lg:col-span-1">
                 <div class="sticky top-6 space-y-6">
                     
-                    <!-- REFERENCIA DE VALORES E INCREMENTO -->
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+                    <!-- REFERENCIA DE VALORES E INCREMENTO (SOLO ADMIN) -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 admin-only hidden">
                         <div class="flex justify-between items-center mb-4 border-b pb-2">
                             <h2 class="text-lg font-semibold flex items-center gap-2">
                                 <i class="fas fa-tags text-blue-600"></i> Referencia de Precios
@@ -111,19 +120,21 @@
                                 </select>
                             </div>
 
-                            <!-- Tipo de Tarifa -->
-                            <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-1 text-blue-600"><i class="fas fa-file-invoice-dollar"></i> Tipo de Tarifa a Aplicar</label>
-                                <select id="tipoTarifa" class="w-full text-sm rounded-md border-blue-300 border p-2 focus:ring-blue-500 focus:border-blue-500 bg-blue-50 font-medium">
-                                    <!-- Llenado dinámicamente -->
-                                </select>
-                            </div>
+                            <!-- Opciones de Tarifas (SOLO ADMIN) -->
+                            <div class="admin-only hidden space-y-3 p-3 bg-blue-50/50 rounded-lg border border-blue-100">
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700 mb-1 text-blue-600"><i class="fas fa-file-invoice-dollar"></i> Tipo de Tarifa a Aplicar</label>
+                                    <select id="tipoTarifa" class="w-full text-sm rounded-md border-blue-300 border p-2 focus:ring-blue-500 focus:border-blue-500 bg-white font-medium">
+                                        <!-- Llenado dinámicamente -->
+                                    </select>
+                                </div>
 
-                            <!-- Costo Manual (Oculto por defecto) -->
-                            <div id="contenedor-costo-manual" class="hidden bg-purple-50 p-3 rounded-lg border border-purple-200">
-                                <label class="block text-xs font-bold text-purple-700 mb-1">Costo Manual a Facturar ($)</label>
-                                <input type="number" min="0" id="costoManual" placeholder="Ej: 45000" class="w-full text-sm rounded-md border-purple-300 border p-2 focus:ring-purple-500 focus:border-purple-500 bg-white">
-                                <p class="text-[10px] text-purple-600 mt-1">Este valor será el final, no se le aplicarán aumentos automáticos.</p>
+                                <!-- Costo Manual (Oculto por defecto) -->
+                                <div id="contenedor-costo-manual" class="hidden bg-purple-50 p-3 rounded-lg border border-purple-200">
+                                    <label class="block text-xs font-bold text-purple-700 mb-1">Costo Manual a Facturar ($)</label>
+                                    <input type="number" min="0" id="costoManual" placeholder="Ej: 45000" class="w-full text-sm rounded-md border-purple-300 border p-2 focus:ring-purple-500 focus:border-purple-500 bg-white">
+                                    <p class="text-[10px] text-purple-600 mt-1">Este valor será el final, no se le aplicarán aumentos automáticos.</p>
+                                </div>
                             </div>
 
                             <!-- Modalidad (Múltiple) -->
@@ -296,6 +307,31 @@
         </div>
     </div>
 
+    <!-- MODAL DE LOGIN (PERSONALIZADO) -->
+    <div id="modal-login" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center p-4 z-[70]">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden flex flex-col p-5">
+            <h3 class="font-bold text-lg mb-3 flex items-center gap-2 text-gray-800"><i class="fas fa-lock text-blue-600"></i> Acceso Administrador</h3>
+            <input type="password" id="input-password" placeholder="Ingresa la contraseña..." class="w-full border border-gray-300 rounded-lg p-3 mb-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors">
+            <p id="login-error" class="text-red-500 text-xs hidden mb-3 font-medium">Contraseña incorrecta. Intenta nuevamente.</p>
+            <div class="flex justify-end gap-2 mt-4">
+                <button onclick="cerrarModalLogin()" class="px-4 py-2 text-gray-600 font-medium hover:bg-gray-200 rounded-lg transition-colors">Cancelar</button>
+                <button onclick="verificarLogin()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">Ingresar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE CONFIRMACIÓN / ALERTA -->
+    <div id="modal-confirm" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center p-4 z-[70]">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden flex flex-col p-5">
+            <h3 id="confirm-title" class="font-bold text-lg mb-2 text-gray-800">Confirmación</h3>
+            <p id="confirm-message" class="text-sm text-gray-600 mb-5">¿Estás seguro?</p>
+            <div class="flex justify-end gap-2">
+                <button id="btn-confirm-cancelar" onclick="cerrarModalConfirm()" class="px-4 py-2 text-gray-600 font-medium hover:bg-gray-200 rounded-lg transition-colors">Cancelar</button>
+                <button id="btn-confirm-action" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- SCRIPT PRINCIPAL Y FIREBASE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -320,7 +356,7 @@
 
         // --- CONSTANTES ---
         const CARRERAS = [
-            { id: 'rh', nombre: 'Recursos Humanos', color: '#B58BC2' }, // Restaurado al lila original de la imagen
+            { id: 'rh', nombre: 'Recursos Humanos', color: '#B58BC2' },
             { id: 'as', nombre: 'Analista de Sistemas', color: '#00AEEF' },
             { id: 'hsl', nombre: 'Higiene y Seguridad Laboral', color: '#F9C51D' },
             { id: 'ae', nombre: 'Administración de Empresas', color: '#87A241' },
@@ -336,9 +372,12 @@
             { id: 'abonado', nombre: 'Abonado', colorClase: 'text-blue-600 bg-blue-100' },
         ];
 
+        const ADMIN_PASSWORD = "1602"; // <-- CONTRASEÑA DE ADMINISTRADOR AQUÍ
+
         // --- ESTADO LOCAL Y PRECIOS ---
         let modulos = [];
         let moduloEditId = null; 
+        let isAdmin = localStorage.getItem('isMaquetacionAdmin') === 'true'; // Variable de Admin
 
         // Valores por defecto si no hay guardados
         const defaultPrecios = {
@@ -369,10 +408,10 @@
             let costoBase = 0;
             
             if (tipoTarifa === 'manual') {
-                return parseFloat(costoManual) || 0; // Al manual no se le suma el incremento automático
+                return parseFloat(costoManual) || 0; 
             }
             
-            if (tipoTarifa === 'paginas') {
+            if (tipoTarifa === 'paginas' || !tipoTarifa) {
                 if (totalPaginas <= 0) return 0;
                 const rangos = [...preciosRef.porPaginas].sort((a,b) => a.limite - b.limite);
                 const rangoEncontrado = rangos.find(r => totalPaginas <= r.limite);
@@ -398,9 +437,6 @@
             // Manejo de la selección del tipo de tarifa
             document.getElementById('tipoTarifa').addEventListener('change', (e) => {
                 const contManual = document.getElementById('contenedor-costo-manual');
-                const pnlPaginas1 = document.getElementById('paginasModulo').parentElement;
-                const pnlPaginas2 = document.getElementById('paginasPrograma').parentElement;
-
                 if (e.target.value === 'manual') {
                     contManual.classList.remove('hidden');
                 } else {
@@ -409,16 +445,108 @@
             });
 
             actualizarUICfgPrecios();
+            checkAdminUI(); // Validar estado visual al inicio
+        });
+
+        // --- SEGURIDAD ADMIN ---
+        const checkAdminUI = () => {
+            // Mostrar u ocultar elementos de administrador
+            const adminElements = document.querySelectorAll('.admin-only');
+            adminElements.forEach(el => {
+                if (isAdmin) {
+                    el.classList.remove('hidden');
+                } else {
+                    el.classList.add('hidden');
+                }
+            });
+
+            // Actualizar botón de Login
+            const btnLogin = document.getElementById('btn-admin-login');
+            if(isAdmin) {
+                btnLogin.innerHTML = '<i class="fas fa-unlock text-green-600"></i> <span class="text-sm font-bold text-green-700 hidden sm:inline">Admin</span>';
+                btnLogin.classList.add('bg-green-50');
+            } else {
+                btnLogin.innerHTML = '<i class="fas fa-lock text-gray-400"></i> <span class="text-sm text-gray-500 hidden sm:inline">Acceso</span>';
+                btnLogin.classList.remove('bg-green-50');
+            }
+            
+            // Re-renderizar lista para ocultar/mostrar precios a las tarjetas
+            if(modulos.length > 0) renderizarModulos();
+        };
+
+        // --- LÓGICA DE MODALES PERSONALIZADOS (LOGIN Y CONFIRMACIÓN) ---
+        let onConfirmAction = null;
+        
+        window.mostrarConfirmacion = (titulo, mensaje, accion, ocultarCancelar = false) => {
+            document.getElementById('confirm-title').innerText = titulo;
+            document.getElementById('confirm-message').innerText = mensaje;
+            onConfirmAction = accion;
+            
+            if (ocultarCancelar) {
+                document.getElementById('btn-confirm-cancelar').classList.add('hidden');
+            } else {
+                document.getElementById('btn-confirm-cancelar').classList.remove('hidden');
+            }
+
+            document.getElementById('modal-confirm').classList.remove('hidden');
+            document.getElementById('modal-confirm').classList.add('flex');
+        };
+
+        window.cerrarModalConfirm = () => {
+            document.getElementById('modal-confirm').classList.add('hidden');
+            document.getElementById('modal-confirm').classList.remove('flex');
+            onConfirmAction = null;
+        };
+
+        document.getElementById('btn-confirm-action').addEventListener('click', () => {
+            if (onConfirmAction) onConfirmAction();
+            cerrarModalConfirm();
+        });
+
+        window.toggleAdmin = () => {
+            if (isAdmin) {
+                window.mostrarConfirmacion("Salir de Administrador", "¿Seguro que deseas cerrar la sesión de administrador y volver al modo normal?", () => {
+                    isAdmin = false;
+                    localStorage.removeItem('isMaquetacionAdmin');
+                    checkAdminUI();
+                });
+            } else {
+                document.getElementById('input-password').value = '';
+                document.getElementById('login-error').classList.add('hidden');
+                document.getElementById('modal-login').classList.remove('hidden');
+                document.getElementById('modal-login').classList.add('flex');
+                
+                setTimeout(() => document.getElementById('input-password').focus(), 100);
+            }
+        };
+
+        window.cerrarModalLogin = () => {
+            document.getElementById('modal-login').classList.add('hidden');
+            document.getElementById('modal-login').classList.remove('flex');
+        };
+
+        window.verificarLogin = () => {
+            const pass = document.getElementById('input-password').value;
+            if (pass === ADMIN_PASSWORD) {
+                isAdmin = true;
+                localStorage.setItem('isMaquetacionAdmin', 'true');
+                checkAdminUI();
+                cerrarModalLogin();
+            } else {
+                document.getElementById('login-error').classList.remove('hidden');
+            }
+        };
+
+        // Permite presionar Enter en el campo de contraseña
+        document.getElementById('input-password').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') window.verificarLogin();
         });
 
         const actualizarUICfgPrecios = () => {
             document.getElementById('display-incremento-sidebar').textContent = `${preciosRef.incremento}%`;
             
-            // Actualizar Select de Tarifa
             const selectTarifa = document.getElementById('tipoTarifa');
             selectTarifa.innerHTML = `<option value="paginas" class="font-bold text-gray-800">📊 Automático por Páginas</option>`;
-            
-            // Opción para definir precio a mano
             selectTarifa.innerHTML += `<option value="manual" class="font-bold text-purple-700">✍️ A definir según contenido</option>`;
 
             if(preciosRef.extras.length > 0) {
@@ -433,23 +561,17 @@
                 selectTarifa.appendChild(group);
             }
 
-            // Renderizar Tabla Lateral
             let htmlTabla = '';
-            const incremento = preciosRef.incremento;
-            const calc = (val) => formatearMoneda(val * (1 + incremento/100));
+            const calc = (val) => formatearMoneda(val * (1 + preciosRef.incremento/100));
 
             let rangos = [...preciosRef.porPaginas].sort((a,b) => a.limite - b.limite);
             let limitAnterior = 0;
             
             rangos.forEach((r, idx) => {
                 let label = '';
-                if (idx === 0) {
-                    label = `Hasta ${r.limite} pág.`;
-                } else if (r.limite >= 9999) {
-                    label = `Más de ${limitAnterior} pág.`;
-                } else {
-                    label = `${limitAnterior + 1} a ${r.limite} pág.`;
-                }
+                if (idx === 0) label = `Hasta ${r.limite} pág.`;
+                else if (r.limite >= 9999) label = `Más de ${limitAnterior} pág.`;
+                else label = `${limitAnterior + 1} a ${r.limite} pág.`;
                 limitAnterior = r.limite;
 
                 htmlTabla += `<tr class="border-b border-gray-100">
@@ -583,7 +705,9 @@
             const pagMod = parseInt(document.getElementById('paginasModulo').value) || 0;
             const pagProg = parseInt(document.getElementById('paginasPrograma').value) || 0;
             const totalPaginas = pagMod + pagProg;
-            const tipoTarifa = document.getElementById('tipoTarifa').value;
+            
+            // Si no es admin, no ve el select, por lo que usará el valor que tenga o 'paginas' por defecto.
+            const tipoTarifa = document.getElementById('tipoTarifa').value || 'paginas';
             const costoManual = document.getElementById('costoManual').value;
 
             const modalidadesCheckboxes = document.querySelectorAll('input[name="modalidad"]:checked');
@@ -637,10 +761,12 @@
 
             moduloEditId = id;
             document.getElementById('carreraId').value = modulo.carreraId || CARRERAS[0].id;
+            
+            // Si es un usuario normal editando algo manual, preservamos el valor en background sin mostrarlo
             document.getElementById('tipoTarifa').value = modulo.tipoTarifa || 'paginas';
             
             if (modulo.tipoTarifa === 'manual') {
-                document.getElementById('contenedor-costo-manual').classList.remove('hidden');
+                if(isAdmin) document.getElementById('contenedor-costo-manual').classList.remove('hidden');
                 document.getElementById('costoManual').value = modulo.costoManualGuardado || modulo.costo;
             } else {
                 document.getElementById('contenedor-costo-manual').classList.add('hidden');
@@ -685,14 +811,15 @@
             }
         };
 
-        window.eliminarModulo = async (id) => {
-            if (window.confirm('¿Estás seguro de eliminar este ítem? Esta acción no se puede deshacer.')) {
+        window.eliminarModulo = (id) => {
+            window.mostrarConfirmacion("Eliminar módulo", "¿Estás seguro de eliminar este ítem? Esta acción no se puede deshacer.", async () => {
                 try {
                     await deleteDoc(doc(db, "modulos", id));
                 } catch (error) {
                     console.error("Error al eliminar documento:", error);
+                    window.mostrarConfirmacion("Error", "Ocurrió un error al eliminar. Revisa la consola.", null, true);
                 }
-            }
+            });
         };
 
         // --- RENDERIZAR LISTA ---
@@ -721,7 +848,7 @@
                 const estadoActual = ESTADOS.find(e => e.id === modulo.estado);
                 const selectClass = estadoActual ? estadoActual.colorClase : '';
 
-                // Textos de enlaces modificados a pedido
+                // Textos de enlaces
                 const enlaceOrigenHtml = modulo.enlaceOrigen 
                     ? `<a href="${modulo.enlaceOrigen}" target="_blank" class="flex items-center gap-1 text-sm text-blue-600 hover:underline truncate"><i class="fas fa-link"></i> Ver archivos originales</a>` 
                     : `<span class="text-sm text-gray-400 flex items-center gap-1"><i class="fas fa-link"></i> Sin origen</span>`;
@@ -755,32 +882,32 @@
                     infoDesgloseHtml = `<div class="text-sm mt-1 text-blue-700 font-semibold flex items-center gap-1"><i class="fas fa-star text-[10px] text-yellow-500"></i> Tarifa Fija: ${nombreExtra}</div>`;
                 }
 
+                // Generación de Costo Visual (Visible SOLO para Admin)
+                let costoVisibleHtml = '';
+                if (isAdmin) {
+                    costoVisibleHtml = `
+                    <div class="mt-1.5 text-xs font-bold text-blue-700 bg-blue-50 inline-block px-2 py-1 rounded border border-blue-100 shadow-sm">
+                        Costo a facturar: ${formatearMoneda(modulo.costo)}
+                    </div>`;
+                }
+
                 // ESTRUCTURA CON MINIATURA INCORPORADA Y TAMAÑO REDUCIDO
                 html += `
                     <div class="bg-white rounded-xl shadow-sm overflow-hidden flex flex-col md:flex-row gap-0 hover:shadow-md transition-shadow relative" style="border: 1px solid #f3f4f6; border-left: 4px solid ${colorFondo};">
                         
                         <!-- MINIATURA ESTILO PORTADA -->
                         <div class="w-full md:w-48 bg-white border-b border-gray-100 md:border-b-0 md:border-r relative overflow-hidden flex flex-col justify-between shrink-0" style="min-height: 140px;">
-                            <!-- Patrón decorativo (círculo rayado) a la izquierda -->
                             <div class="absolute left-[-22px] top-[30px] w-14 h-24 rounded-r-full opacity-80" style="color: ${colorFondo}; background: repeating-linear-gradient(-45deg, transparent, transparent 3px, currentColor 3px, currentColor 6px);"></div>
-                            
-                            <!-- Espacio superior libre para no estar "en la cima" -->
                             <div class="pt-2"></div>
-
-                            <!-- Centro: Carrera y Materia -->
                             <div class="flex-1 flex flex-col items-center justify-center p-2 pl-4 pr-2 z-10 text-center gap-1.5">
-                                <!-- Etiqueta superior con corte (Carrera) centrada arriba de la materia -->
                                 <div class="text-white font-bold text-center py-1 px-3 z-10 text-[7px] uppercase shadow-sm inline-block" style="background-color: ${colorFondo}; clip-path: polygon(8px 0, 100% 0, 100% 100%, 0 100%);">
                                     TECNICATURA SUPERIOR EN<br/>
                                     <span class="text-[8px]">${carrera?.nombre || 'CARRERA'}</span>
                                 </div>
-
                                 <div class="font-extrabold text-[13px] uppercase tracking-wide leading-tight" style="color: ${colorFondo};">
                                     ${nombreMostrar}
                                 </div>
                             </div>
-
-                            <!-- Footer: Elaborado por -->
                             <div class="text-white z-10 p-1.5 px-3 text-left flex flex-col justify-center mb-3 mx-auto shadow-sm w-[85%]" style="background-color: ${colorFondo};">
                                 <span class="text-[7px] opacity-90">Material elaborado por</span>
                                 <span class="font-bold text-[9px] leading-tight">${modulo.profesor || 'Docente'}</span>
@@ -818,9 +945,7 @@
                                 <div>
                                     <p class="text-[10px] text-gray-500 mb-0.5 font-semibold uppercase tracking-wide">Desglose de Trabajo</p>
                                     ${infoDesgloseHtml}
-                                    <div class="mt-1.5 text-xs font-bold text-blue-700 bg-blue-50 inline-block px-2 py-1 rounded border border-blue-100 shadow-sm">
-                                        Costo a facturar: ${formatearMoneda(modulo.costo)}
-                                    </div>
+                                    ${costoVisibleHtml}
                                 </div>
 
                                 <div class="space-y-1.5">
@@ -850,7 +975,11 @@
 
         // --- EXPORTAR EXCEL ---
         window.exportarExcel = () => {
-            if(modulos.length === 0) return alert("No hay módulos para exportar.");
+            if (!isAdmin) return; // Validación de seguridad extra
+            if(modulos.length === 0) {
+                window.mostrarConfirmacion("Sin datos", "No hay módulos para exportar.", null, true);
+                return;
+            }
             
             const data = modulos.map(m => {
                 const carrera = CARRERAS.find(c => c.id === m.carreraId);
@@ -887,9 +1016,9 @@
 
         // --- EXPORTAR PDF (TARIFARIO) ---
         window.exportarPDF = () => {
+            if (!isAdmin) return;
             const calcAct = (base) => formatearMoneda(base * (1 + preciosRef.incremento/100));
             
-            // Construir el HTML que se transformará a PDF
             const divPDF = document.createElement('div');
             
             let tablaPaginas = '';
@@ -920,7 +1049,6 @@
                     </tr>`;
                  });
             }
-            // Agregamos el "A definir" al final de la tabla
             tablaExtras += `
                 <tr style="border-bottom: 1px solid #e5e7eb;">
                     <td style="padding: 12px; font-size: 14px; color: #374151;">A definir según complejidad del contenido</td>
@@ -979,12 +1107,12 @@
                 jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
             };
 
-            // Notificamos UI (Podría ser un botón cargando, pero es rápido)
             html2pdf().set(opt).from(divPDF).save();
         };
 
         // --- LÓGICA DEL CORREO (TEXTO LIMPIO SIN DIVS) ---
         window.abrirModalCorreo = () => {
+            if (!isAdmin) return;
             const realizados = modulos.filter(m => m.estado === 'realizado');
             const totalFacturar = realizados.reduce((acc, m) => acc + m.costo, 0);
 
@@ -1035,10 +1163,8 @@
                 correoHTML += `<p style="font-family: Arial, sans-serif; font-size: 14px; margin-bottom: 20px; color: #666; font-style: italic;">[No hay módulos marcados como "Realizado" en este periodo]</p>`;
             }
 
-            // Calculamos los precios actualizados para la tabla de referencia final
             const calcAct = (base) => formatearMoneda(base * (1 + preciosRef.incremento/100));
 
-            // AVISO DE ADECUACIÓN DE PRECIOS
             if (preciosRef.incremento > 0) {
                 correoHTML += `
                 <p style="font-family: Arial, sans-serif; font-size: 13px; color: #b91c1c; font-weight: bold; margin-bottom: 15px; padding: 10px; background-color: #fef2f2; border-left: 4px solid #b91c1c;">
@@ -1052,7 +1178,6 @@
                 <table style="width: 380px; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 12px; margin-bottom: 20px;">
                     <tbody>`;
             
-            // Reconstruir la tabla de ref usando los datos reales
             let rangos = [...preciosRef.porPaginas].sort((a,b) => a.limite - b.limite);
             let limitAnterior = 0;
             rangos.forEach((r, idx) => {

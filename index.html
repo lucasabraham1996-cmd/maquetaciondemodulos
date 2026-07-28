@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -5,12 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestor de Maquetación</title>
     <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="text/javascript" src="https://gc.kes.v2.scr.kaspersky-labs.com/7EA5E9BB-55E1-4C31-9C21-4943DDFED2E4/main.js?attr=GqfOIUTERUP5nvme-ZYQSvyLemKSrF0oTtNvwDYEoqtqsrWeba1XFtTpUCEYbDBV9WcBuUES7m28RDp09G8Xvzs8bcXiU3YrhVmUHchY8vo" charset="UTF-8"></script><script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome para los íconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Librerías para PDF y Excel -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     
     <style>
         /* Estilos base personalizados */
@@ -91,19 +94,13 @@
                             </button>
                         </div>
                         
-                        <div class="mb-4 bg-gray-50 p-3 rounded-lg border border-gray-200 flex justify-between items-center">
-                            <span class="text-sm font-bold text-gray-700">Aumento Activo:</span>
-                            <span class="text-lg font-bold text-blue-600" id="display-incremento-sidebar">0%</span>
+                        <div class="bg-blue-50 p-4 rounded-lg border border-blue-200 text-center">
+                            <span class="block text-xs font-bold text-blue-700 uppercase tracking-wide">Tarifa por página</span>
+                            <span class="block text-3xl font-extrabold text-blue-800 mt-1" id="display-precio-pagina">$ 800</span>
+                            <span class="block text-[11px] text-blue-600 mt-1">Se multiplica por el total de páginas cargadas.</span>
                         </div>
-
-                        <div class="max-h-60 overflow-y-auto pr-2">
-                            <table class="w-full text-sm text-left text-gray-600">
-                                <tbody id="tabla-valores-body">
-                                    <!-- Generado por JS -->
-                                </tbody>
-                            </table>
-                        </div>
-                        <p class="text-[10px] text-gray-400 mt-3 text-center">Al crear o editar un módulo, se usará la tabla actual.</p>
+                        <div id="tabla-valores-body" class="mt-3"></div>
+                        <p class="text-[10px] text-gray-400 mt-3 text-center">Los módulos ya guardados conservan el importe que tenían.</p>
                     </div>
 
                     <!-- FORMULARIO DE INGRESO / EDICIÓN -->
@@ -170,6 +167,15 @@
                                     <label class="block text-xs font-medium text-gray-700 mb-1">Fecha de Entrega</label>
                                     <input type="date" id="fechaEntrega" class="w-full text-sm rounded-md border-gray-300 border p-2 focus:ring-blue-500 focus:border-blue-500 text-gray-600">
                                 </div>
+                            </div>
+
+                            <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg space-y-3">
+                                <div>
+                                    <label class="block text-xs font-bold text-blue-800 mb-1"><i class="fas fa-file-upload mr-1"></i> Leer páginas desde archivos</label>
+                                    <p class="text-[10px] text-blue-600 mb-2">Podés seleccionar uno o dos archivos PDF o Word (.docx). El primero se asigna al módulo y el segundo al programa.</p>
+                                    <input type="file" id="archivosPaginas" accept=".pdf,.docx,.doc" multiple class="w-full text-xs rounded-md border border-blue-300 bg-white p-2 file:mr-2 file:rounded file:border-0 file:bg-blue-600 file:px-3 file:py-1.5 file:text-white hover:file:bg-blue-700">
+                                </div>
+                                <div id="estado-lectura-archivos" class="hidden text-xs rounded-md p-2"></div>
                             </div>
 
                             <div class="grid grid-cols-2 gap-3 p-3 bg-gray-50 border border-gray-200 rounded-lg">
@@ -243,16 +249,14 @@
                     <p class="text-xs text-blue-700 mt-2">Este porcentaje se suma automáticamente a los valores base configurados abajo. El correo también avisará sobre la adecuación.</p>
                 </div>
 
-                <!-- Categorías por Páginas -->
+                <!-- Tarifa por página -->
                 <div>
-                    <div class="flex justify-between items-center mb-3">
-                        <h4 class="font-bold text-gray-800"><i class="fas fa-file-alt text-gray-500"></i> Categorías por Cantidad de Páginas</h4>
-                        <button onclick="agregarFilaPaginas()" class="text-xs bg-gray-900 text-white px-2 py-1 rounded hover:bg-gray-700 transition-colors">+ Rango</button>
+                    <h4 class="font-bold text-gray-800 mb-3"><i class="fas fa-file-alt text-gray-500"></i> Tarifa de maquetado</h4>
+                    <div class="bg-gray-50 border border-gray-200 p-4 rounded-lg">
+                        <label class="block text-sm font-bold text-gray-800 mb-2">Precio por página ($ ARS)</label>
+                        <input type="number" id="config-precio-pagina" min="0" step="1" class="w-full rounded border-gray-300 p-2 text-right font-bold" value="800">
+                        <p class="text-xs text-gray-500 mt-2">El costo se calcula multiplicando el total de páginas del módulo y del programa por este valor.</p>
                     </div>
-                    <div id="lista-config-paginas" class="space-y-2">
-                        <!-- Llenado por JS -->
-                    </div>
-                    <p class="text-[10px] text-gray-500 mt-2">Usa un número muy alto (ej: 9999) para el rango final "Más de...".</p>
                 </div>
 
                 <!-- Categorías Especiales Fijas -->
@@ -382,16 +386,17 @@
         // Valores por defecto si no hay guardados
         const defaultPrecios = {
             incremento: 0,
-            porPaginas: [
-                { id: 'p1', limite: 80, precioBase: 42000 },
-                { id: 'p2', limite: 120, precioBase: 52500 },
-                { id: 'p3', limite: 140, precioBase: 63000 },
-                { id: 'p4', limite: 99999, precioBase: 73500 }
-            ],
+            precioPorPagina: 800,
             extras: []
         };
 
-        let preciosRef = JSON.parse(localStorage.getItem('preciosMaquetacionConfig')) || defaultPrecios;
+        const preciosGuardados = JSON.parse(localStorage.getItem('preciosMaquetacionConfig') || 'null');
+        let preciosRef = {
+            ...defaultPrecios,
+            ...(preciosGuardados || {}),
+            precioPorPagina: 800
+        };
+        localStorage.setItem('preciosMaquetacionConfig', JSON.stringify(preciosRef));
 
         // --- FUNCIONES AUXILIARES ---
         const formatearMoneda = (valor) => {
@@ -405,22 +410,15 @@
         };
 
         const calcularCostoActivo = (tipoTarifa, totalPaginas, costoManual) => {
-            let costoBase = 0;
-            
-            if (tipoTarifa === 'manual') {
-                return parseFloat(costoManual) || 0; 
-            }
-            
+            if (tipoTarifa === 'manual') return parseFloat(costoManual) || 0;
+
             if (tipoTarifa === 'paginas' || !tipoTarifa) {
                 if (totalPaginas <= 0) return 0;
-                const rangos = [...preciosRef.porPaginas].sort((a,b) => a.limite - b.limite);
-                const rangoEncontrado = rangos.find(r => totalPaginas <= r.limite);
-                costoBase = rangoEncontrado ? rangoEncontrado.precioBase : rangos[rangos.length - 1].precioBase;
-            } else {
-                const extra = preciosRef.extras.find(e => e.id === tipoTarifa);
-                costoBase = extra ? extra.precioBase : 0;
+                return totalPaginas * preciosRef.precioPorPagina * (1 + (preciosRef.incremento / 100));
             }
 
+            const extra = preciosRef.extras.find(e => e.id === tipoTarifa);
+            const costoBase = extra ? extra.precioBase : 0;
             return costoBase * (1 + (preciosRef.incremento / 100));
         };
 
@@ -443,6 +441,12 @@
                     contManual.classList.add('hidden');
                 }
             });
+
+            if (window.pdfjsLib) {
+                window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+            }
+
+            document.getElementById('archivosPaginas').addEventListener('change', procesarArchivosPaginas);
 
             actualizarUICfgPrecios();
             checkAdminUI(); // Validar estado visual al inicio
@@ -543,10 +547,10 @@
         });
 
         const actualizarUICfgPrecios = () => {
-            document.getElementById('display-incremento-sidebar').textContent = `${preciosRef.incremento}%`;
-            
+            document.getElementById('display-precio-pagina').textContent = formatearMoneda(preciosRef.precioPorPagina);
+
             const selectTarifa = document.getElementById('tipoTarifa');
-            selectTarifa.innerHTML = `<option value="paginas" class="font-bold text-gray-800">📊 Automático por Páginas</option>`;
+            selectTarifa.innerHTML = `<option value="paginas" class="font-bold text-gray-800">📄 ${formatearMoneda(preciosRef.precioPorPagina)} por página</option>`;
             selectTarifa.innerHTML += `<option value="manual" class="font-bold text-purple-700">✍️ A definir según contenido</option>`;
 
             if(preciosRef.extras.length > 0) {
@@ -561,48 +565,88 @@
                 selectTarifa.appendChild(group);
             }
 
-            let htmlTabla = '';
-            const calc = (val) => formatearMoneda(val * (1 + preciosRef.incremento/100));
-
-            let rangos = [...preciosRef.porPaginas].sort((a,b) => a.limite - b.limite);
-            let limitAnterior = 0;
-            
-            rangos.forEach((r, idx) => {
-                let label = '';
-                if (idx === 0) label = `Hasta ${r.limite} pág.`;
-                else if (r.limite >= 9999) label = `Más de ${limitAnterior} pág.`;
-                else label = `${limitAnterior + 1} a ${r.limite} pág.`;
-                limitAnterior = r.limite;
-
-                htmlTabla += `<tr class="border-b border-gray-100">
-                            <td class="py-2.5">${label}</td>
-                            <td class="py-2.5 text-right font-bold text-gray-800">${calc(r.precioBase)}</td>
-                        </tr>`;
-            });
-
-            if(preciosRef.extras.length > 0) {
-                htmlTabla += `<tr><td colspan="2" class="pt-4 pb-2 text-xs font-bold text-blue-600 uppercase tracking-wide border-b border-gray-100">Categorías Especiales</td></tr>`;
-                preciosRef.extras.forEach(e => {
-                    htmlTabla += `<tr class="border-b border-gray-100">
-                                <td class="py-2.5 text-gray-600"><i class="fas fa-star text-yellow-500 text-[10px] mr-1"></i> ${e.nombre}</td>
-                                <td class="py-2.5 text-right font-bold text-gray-800">${calc(e.precioBase)}</td>
-                            </tr>`;
-                });
-            }
-
-            document.getElementById('tabla-valores-body').innerHTML = htmlTabla;
+            document.getElementById('tabla-valores-body').innerHTML = `
+                <div class="flex justify-between text-xs bg-gray-50 border border-gray-200 rounded-lg p-2">
+                    <span class="text-gray-600">Ejemplo: 80 páginas</span>
+                    <b class="text-gray-800">${formatearMoneda(80 * preciosRef.precioPorPagina * (1 + preciosRef.incremento/100))}</b>
+                </div>`;
         };
 
+        const mostrarEstadoArchivos = (mensaje, tipo = 'info') => {
+            const estado = document.getElementById('estado-lectura-archivos');
+            const clases = {
+                info: 'bg-blue-100 text-blue-800 border border-blue-200',
+                ok: 'bg-green-100 text-green-800 border border-green-200',
+                error: 'bg-red-100 text-red-800 border border-red-200'
+            };
+            estado.className = `text-xs rounded-md p-2 ${clases[tipo] || clases.info}`;
+            estado.innerHTML = mensaje;
+        };
+
+        const contarPaginasPDF = async (archivo) => {
+            if (!window.pdfjsLib) throw new Error('No se pudo cargar el lector de PDF.');
+            const data = new Uint8Array(await archivo.arrayBuffer());
+            const pdf = await window.pdfjsLib.getDocument({ data }).promise;
+            return pdf.numPages;
+        };
+
+        const contarPaginasDOCX = async (archivo) => {
+            const zip = await JSZip.loadAsync(await archivo.arrayBuffer());
+            const appXml = zip.file('docProps/app.xml');
+            if (!appXml) throw new Error('El archivo Word no contiene el dato de páginas.');
+            const xml = await appXml.async('text');
+            const match = xml.match(/<Pages>(\d+)<\/Pages>/i);
+            if (!match || Number(match[1]) <= 0) throw new Error('Word no guardó un número de páginas actualizado.');
+            return Number(match[1]);
+        };
+
+        const contarPaginasArchivo = async (archivo) => {
+            const extension = archivo.name.split('.').pop().toLowerCase();
+            if (extension === 'pdf') return contarPaginasPDF(archivo);
+            if (extension === 'docx') return contarPaginasDOCX(archivo);
+            if (extension === 'doc') throw new Error('El formato .doc antiguo no permite contar páginas desde el navegador. Guardalo como .docx o PDF.');
+            throw new Error('Formato no compatible.');
+        };
+
+        const procesarArchivosPaginas = async (e) => {
+            const archivos = Array.from(e.target.files || []);
+            if (archivos.length === 0) return;
+            if (archivos.length > 2) {
+                mostrarEstadoArchivos('<i class="fas fa-exclamation-circle mr-1"></i> Seleccioná como máximo dos archivos.', 'error');
+                e.target.value = '';
+                return;
+            }
+
+            mostrarEstadoArchivos('<i class="fas fa-spinner fa-spin mr-1"></i> Leyendo cantidad de páginas...', 'info');
+            const resultados = [];
+
+            for (const archivo of archivos) {
+                try {
+                    const paginas = await contarPaginasArchivo(archivo);
+                    resultados.push({ archivo, paginas, ok: true });
+                } catch (error) {
+                    resultados.push({ archivo, paginas: 0, ok: false, error: error.message });
+                }
+            }
+
+            if (resultados[0]?.ok) document.getElementById('paginasModulo').value = resultados[0].paginas;
+            if (resultados[1]?.ok) document.getElementById('paginasPrograma').value = resultados[1].paginas;
+
+            const lineas = resultados.map((r, i) => r.ok
+                ? `<div><i class="fas fa-check-circle mr-1"></i> ${i === 0 ? 'Módulo' : 'Programa'}: <b>${r.paginas} páginas</b> — ${r.archivo.name}</div>`
+                : `<div><i class="fas fa-exclamation-triangle mr-1"></i> ${r.archivo.name}: ${r.error}</div>`
+            ).join('');
+
+            const total = (parseInt(document.getElementById('paginasModulo').value) || 0) + (parseInt(document.getElementById('paginasPrograma').value) || 0);
+            const costo = calcularCostoActivo('paginas', total, 0);
+            const resumen = `<div class="mt-1 pt-1 border-t border-current/20"><b>Total: ${total} páginas · ${formatearMoneda(costo)}</b></div>`;
+            mostrarEstadoArchivos(lineas + resumen, resultados.every(r => r.ok) ? 'ok' : 'error');
+        };
 
         // --- LÓGICA MODAL EDICIÓN PRECIOS ---
         window.abrirModalPrecios = () => {
             document.getElementById('config-incremento').value = preciosRef.incremento;
-            
-            const contPaginas = document.getElementById('lista-config-paginas');
-            contPaginas.innerHTML = '';
-            [...preciosRef.porPaginas].sort((a,b) => a.limite - b.limite).forEach(r => {
-                contPaginas.insertAdjacentHTML('beforeend', crearFilaPaginas(r.id, r.limite, r.precioBase));
-            });
+            document.getElementById('config-precio-pagina').value = preciosRef.precioPorPagina;
 
             const contExtras = document.getElementById('lista-config-extras');
             contExtras.innerHTML = '';
@@ -619,17 +663,6 @@
             document.getElementById('modal-precios').classList.remove('flex');
         };
 
-        const crearFilaPaginas = (id, limite, precio) => {
-            return `
-            <div class="flex items-center gap-2 fila-pagina" data-id="${id}">
-                <span class="text-sm text-gray-600 w-16">Hasta:</span>
-                <input type="number" class="w-24 border border-gray-300 rounded p-1 text-sm input-limite" value="${limite}">
-                <span class="text-sm text-gray-600">pág = $</span>
-                <input type="number" class="flex-1 border border-gray-300 rounded p-1 text-sm input-precio" value="${precio}">
-                <button onclick="this.parentElement.remove()" class="text-red-500 hover:bg-red-50 p-1.5 rounded"><i class="fas fa-trash"></i></button>
-            </div>`;
-        };
-
         const crearFilaExtra = (id, nombre, precio) => {
             return `
             <div class="flex items-center gap-2 fila-extra" data-id="${id}">
@@ -640,23 +673,13 @@
             </div>`;
         };
 
-        window.agregarFilaPaginas = () => {
-            document.getElementById('lista-config-paginas').insertAdjacentHTML('beforeend', crearFilaPaginas('p_'+Date.now(), '', ''));
-        };
-
         window.agregarFilaExtra = () => {
             document.getElementById('lista-config-extras').insertAdjacentHTML('beforeend', crearFilaExtra('e_'+Date.now(), '', ''));
         };
 
         window.guardarPrecios = () => {
             const incremento = parseFloat(document.getElementById('config-incremento').value) || 0;
-            
-            const nuevasPaginas = [];
-            document.querySelectorAll('.fila-pagina').forEach(fila => {
-                const limite = parseInt(fila.querySelector('.input-limite').value) || 0;
-                const precio = parseFloat(fila.querySelector('.input-precio').value) || 0;
-                nuevasPaginas.push({ id: fila.dataset.id, limite, precioBase: precio });
-            });
+            const precioPorPagina = parseFloat(document.getElementById('config-precio-pagina').value) || 800;
 
             const nuevosExtras = [];
             document.querySelectorAll('.fila-extra').forEach(fila => {
@@ -665,17 +688,11 @@
                 nuevosExtras.push({ id: fila.dataset.id, nombre, precioBase: precio });
             });
 
-            preciosRef = {
-                incremento,
-                porPaginas: nuevasPaginas,
-                extras: nuevosExtras
-            };
-
+            preciosRef = { incremento, precioPorPagina, extras: nuevosExtras };
             localStorage.setItem('preciosMaquetacionConfig', JSON.stringify(preciosRef));
             actualizarUICfgPrecios();
             cerrarModalPrecios();
         };
-
 
         // --- ESCUCHAR DATOS DE FIREBASE EN TIEMPO REAL ---
         const q = query(modulosRef, orderBy("createdAt", "desc"));
@@ -744,6 +761,8 @@
                     document.getElementById('carreraId').value = CARRERAS[0].id;
                     document.getElementById('tipoTarifa').value = 'paginas';
                     document.getElementById('contenedor-costo-manual').classList.add('hidden');
+                    document.getElementById('archivosPaginas').value = '';
+                    document.getElementById('estado-lectura-archivos').classList.add('hidden');
                 }
             } catch (error) {
                 console.error("Error al guardar documento: ", error);
@@ -800,6 +819,8 @@
             document.getElementById('titulo-formulario').innerHTML = '<i class="fas fa-plus text-green-600"></i> Nuevo Módulo';
             document.getElementById('btn-submit-text').innerHTML = 'Agregar a la lista';
             document.getElementById('btn-cancelar-edicion').classList.add('hidden');
+            document.getElementById('archivosPaginas').value = '';
+            document.getElementById('estado-lectura-archivos').classList.add('hidden');
         };
 
         window.cambiarEstado = async (id, nuevoEstado) => {
@@ -1021,22 +1042,11 @@
             
             const divPDF = document.createElement('div');
             
-            let tablaPaginas = '';
-            let rangos = [...preciosRef.porPaginas].sort((a,b) => a.limite - b.limite);
-            let limitAnterior = 0;
-            rangos.forEach((r, idx) => {
-                let label = '';
-                if (idx === 0) label = `Hasta ${r.limite} páginas`;
-                else if (r.limite >= 9999) label = `Más de ${limitAnterior} páginas`;
-                else label = `${limitAnterior + 1} a ${r.limite} páginas`;
-                limitAnterior = r.limite;
-
-                tablaPaginas += `
+            let tablaPaginas = `
                 <tr style="border-bottom: 1px solid #e5e7eb;">
-                    <td style="padding: 12px; font-size: 14px; color: #374151;">${label}</td>
-                    <td style="padding: 12px; font-size: 14px; text-align: right; font-weight: bold; color: #111827;">${calcAct(r.precioBase)}</td>
+                    <td style="padding: 12px; font-size: 14px; color: #374151;">Maquetado por página</td>
+                    <td style="padding: 12px; font-size: 14px; text-align: right; font-weight: bold; color: #111827;">${calcAct(preciosRef.precioPorPagina)}</td>
                 </tr>`;
-            });
 
             let tablaExtras = '';
             if(preciosRef.extras.length > 0) {
@@ -1178,21 +1188,11 @@
                 <table style="width: 380px; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 12px; margin-bottom: 20px;">
                     <tbody>`;
             
-            let rangos = [...preciosRef.porPaginas].sort((a,b) => a.limite - b.limite);
-            let limitAnterior = 0;
-            rangos.forEach((r, idx) => {
-                let label = '';
-                if (idx === 0) label = `Hasta ${r.limite} páginas`;
-                else if (r.limite >= 9999) label = `Más de ${limitAnterior} páginas`;
-                else label = `${limitAnterior + 1} a ${r.limite} páginas`;
-                limitAnterior = r.limite;
-
-                correoHTML += `
+            correoHTML += `
                 <tr>
-                    <td style="border: 1px solid #e5e7eb; padding: 6px 10px; background-color: #f9fafb;">${label}</td>
-                    <td style="border: 1px solid #e5e7eb; padding: 6px 10px; text-align: right; font-weight: 500;">${calcAct(r.precioBase)}</td>
+                    <td style="border: 1px solid #e5e7eb; padding: 6px 10px; background-color: #f9fafb;">Maquetado por página</td>
+                    <td style="border: 1px solid #e5e7eb; padding: 6px 10px; text-align: right; font-weight: 500;">${calcAct(preciosRef.precioPorPagina)}</td>
                 </tr>`;
-            });
 
             if(preciosRef.extras.length > 0) {
                  correoHTML += `<tr><td colspan="2" style="border: 1px solid #e5e7eb; padding: 6px 10px; background-color: #f3f4f6; font-weight: bold; text-align: center;">Categorías Adicionales</td></tr>`;

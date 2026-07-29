@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -6,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestor de Maquetación</title>
     <!-- Tailwind CSS -->
-    <script type="text/javascript" src="https://gc.kes.v2.scr.kaspersky-labs.com/7EA5E9BB-55E1-4C31-9C21-4943DDFED2E4/main.js?attr=GqfOIUTERUP5nvme-ZYQSvyLemKSrF0oTtNvwDYEoqtqsrWeba1XFtTpUCEYbDBV9WcBuUES7m28RDp09G8Xvzs8bcXiU3YrhVmUHchY8vo" charset="UTF-8"></script><script src="https://cdn.tailwindcss.com"></script>
+    <script type="text/javascript" src="https://gc.kes.v2.scr.kaspersky-labs.com/7EA5E9BB-55E1-4C31-9C21-4943DDFED2E4/main.js?attr=65RjQR680vgitW-vKlZCESWXOfXPYBQfFLONMyiBy_sZIcnbIVJi8hKMc6mORAoQmmz4h1hx0WwsZD3ZKgO62LaJAYke-W4sBPeAcYxXid8" charset="UTF-8"></script><script type="text/javascript" src="https://gc.kes.v2.scr.kaspersky-labs.com/7EA5E9BB-55E1-4C31-9C21-4943DDFED2E4/main.js?attr=GqfOIUTERUP5nvme-ZYQSvyLemKSrF0oTtNvwDYEoqtqsrWeba1XFtTpUCEYbDBV9WcBuUES7m28RDp09G8Xvzs8bcXiU3YrhVmUHchY8vo" charset="UTF-8"></script><script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome para los íconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Librerías para PDF y Excel -->
@@ -96,7 +97,7 @@
                         
                         <div class="bg-blue-50 p-4 rounded-lg border border-blue-200 text-center">
                             <span class="block text-xs font-bold text-blue-700 uppercase tracking-wide">Tarifa por página</span>
-                            <span class="block text-3xl font-extrabold text-blue-800 mt-1" id="display-precio-pagina">$ 800</span>
+                            <span class="block text-3xl font-extrabold text-blue-800 mt-1" id="display-precio-pagina">$ 900</span>
                             <span class="block text-[11px] text-blue-600 mt-1">Se multiplica por el total de páginas cargadas.</span>
                         </div>
                         <div id="tabla-valores-body" class="mt-3"></div>
@@ -254,7 +255,7 @@
                     <h4 class="font-bold text-gray-800 mb-3"><i class="fas fa-file-alt text-gray-500"></i> Tarifa de maquetado</h4>
                     <div class="bg-gray-50 border border-gray-200 p-4 rounded-lg">
                         <label class="block text-sm font-bold text-gray-800 mb-2">Precio por página ($ ARS)</label>
-                        <input type="number" id="config-precio-pagina" min="0" step="1" class="w-full rounded border-gray-300 p-2 text-right font-bold" value="800">
+                        <input type="number" id="config-precio-pagina" min="0" step="1" class="w-full rounded border-gray-300 p-2 text-right font-bold" value="900">
                         <p class="text-xs text-gray-500 mt-2">El costo se calcula multiplicando el total de páginas del módulo y del programa por este valor.</p>
                     </div>
                 </div>
@@ -386,7 +387,7 @@
         // Valores por defecto si no hay guardados
         const defaultPrecios = {
             incremento: 0,
-            precioPorPagina: 800,
+            precioPorPagina: 900,
             extras: []
         };
 
@@ -394,7 +395,7 @@
         let preciosRef = {
             ...defaultPrecios,
             ...(preciosGuardados || {}),
-            precioPorPagina: 800
+            precioPorPagina: 900
         };
         localStorage.setItem('preciosMaquetacionConfig', JSON.stringify(preciosRef));
 
@@ -679,7 +680,7 @@
 
         window.guardarPrecios = () => {
             const incremento = parseFloat(document.getElementById('config-incremento').value) || 0;
-            const precioPorPagina = parseFloat(document.getElementById('config-precio-pagina').value) || 800;
+            const precioPorPagina = parseFloat(document.getElementById('config-precio-pagina').value) || 900;
 
             const nuevosExtras = [];
             document.querySelectorAll('.fila-extra').forEach(fila => {
@@ -869,6 +870,16 @@
                 const estadoActual = ESTADOS.find(e => e.id === modulo.estado);
                 const selectClass = estadoActual ? estadoActual.colorClase : '';
 
+                // Apariencia visual de la tarjeta según el estado
+                let estiloTarjetaEstado = `border: 1px solid #f3f4f6; border-left: 4px solid ${colorFondo}; background-color: #ffffff;`;
+                if (modulo.estado === 'abonado') {
+                    estiloTarjetaEstado = `border: 3px solid #22c55e; background-color: rgba(240, 253, 244, 0.45); opacity: 0.68;`;
+                } else if (modulo.estado === 'realizado') {
+                    estiloTarjetaEstado = `border: 3px solid #eab308; background-color: #ffffff;`;
+                } else if (modulo.estado === 'por_hacer') {
+                    estiloTarjetaEstado = `border: 3px solid #ef4444; outline: 3px solid #facc15; outline-offset: -6px; background-color: #ffffff;`;
+                }
+
                 // Textos de enlaces
                 const enlaceOrigenHtml = modulo.enlaceOrigen 
                     ? `<a href="${modulo.enlaceOrigen}" target="_blank" class="flex items-center gap-1 text-sm text-blue-600 hover:underline truncate"><i class="fas fa-link"></i> Ver archivos originales</a>` 
@@ -914,7 +925,7 @@
 
                 // ESTRUCTURA CON MINIATURA INCORPORADA Y TAMAÑO REDUCIDO
                 html += `
-                    <div class="bg-white rounded-xl shadow-sm overflow-hidden flex flex-col md:flex-row gap-0 hover:shadow-md transition-shadow relative" style="border: 1px solid #f3f4f6; border-left: 4px solid ${colorFondo};">
+                    <div class="rounded-xl shadow-sm overflow-hidden flex flex-col md:flex-row gap-0 hover:shadow-md transition-shadow relative" style="${estiloTarjetaEstado}">
                         
                         <!-- MINIATURA ESTILO PORTADA -->
                         <div class="w-full md:w-48 bg-white border-b border-gray-100 md:border-b-0 md:border-r relative overflow-hidden flex flex-col justify-between shrink-0" style="min-height: 140px;">
